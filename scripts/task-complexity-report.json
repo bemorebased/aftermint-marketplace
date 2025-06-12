@@ -1,0 +1,59 @@
+{
+  "meta": {
+    "generatedAt": "2025-05-22T09:21:14.193Z",
+    "tasksAnalyzed": 6,
+    "thresholdScore": 5,
+    "projectName": "Taskmaster",
+    "usedResearch": true
+  },
+  "complexityAnalysis": [
+    {
+      "taskId": 4,
+      "taskTitle": "Develop NFT Display and Listing Features",
+      "complexityScore": 8,
+      "recommendedSubtasks": 3,
+      "expansionPrompt": "Break down the task into subtasks for fetching NFT data, displaying NFT listings, and implementing links to individual detail pages.",
+      "reasoning": "This task involves multiple features that require API interactions and UI implementation."
+    },
+    {
+      "taskId": 6,
+      "taskTitle": "Develop Marketplace Interactions (Listing, Buying, Updating, Canceling)",
+      "complexityScore": 9,
+      "recommendedSubtasks": 5,
+      "expansionPrompt": "Break down the task into subtasks for listing NFTs, buying listed NFTs, updating listing prices, canceling listings, and implementing offer handling.",
+      "reasoning": "This task involves multiple features that require smart contract interactions, error handling, and UI implementation."
+    },
+    {
+      "taskId": 7,
+      "taskTitle": "Implement Collection Browsing Features",
+      "complexityScore": 5,
+      "recommendedSubtasks": 2,
+      "expansionPrompt": "Break down the task into subtasks for fetching collection data and implementing a system for displaying basic collection info.",
+      "reasoning": "This task involves API interactions and UI implementation, but is less complex than other tasks in this list."
+    },
+    {
+      "taskId": 8,
+      "taskTitle": "Implement Transfer NFT Feature",
+      "complexityScore": 6,
+      "recommendedSubtasks": 2,
+      "expansionPrompt": "Break down the task into subtasks for implementing ERC721 approval and transfer.",
+      "reasoning": "This task involves smart contract interactions, but is less complex than other tasks in this list."
+    },
+    {
+      "taskId": 9,
+      "taskTitle": "Implement Robust Error Handling and Clear Loading States",
+      "complexityScore": 4,
+      "recommendedSubtasks": 2,
+      "expansionPrompt": "Break down the task into subtasks for implementing error handling and loading states.",
+      "reasoning": "This task involves UI implementation, but is relatively straightforward."
+    },
+    {
+      "taskId": 10,
+      "taskTitle": "Test and Deploy the Application",
+      "complexityScore": 7,
+      "recommendedSubtasks": 4,
+      "expansionPrompt": "Break down the task into subtasks for writing unit tests, integration tests, implementing CI/CD, and deploying the application.",
+      "reasoning": "This task involves testing and deployment, which can be complex but is often broken down into smaller tasks."
+    }
+  ]
+}

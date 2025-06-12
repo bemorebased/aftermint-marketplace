@@ -1,0 +1,51 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Default theme: Dark */
+    --background: 0 0% 0%; /* #000000 */
+    --surface: 0 0% 6%; /* #101010 */
+    --primary: 170 70% 50%; /* #32E0C4 */
+    --secondary: 260 95% 75%; /* #BB86FC */
+    --text-primary: 0 0% 100%; /* #FFFFFF */
+    --text-secondary: 0 0% 63%; /* #A0A0A0 */
+    --border-color: 0 0% 13%; /* #212121 */
+  }
+
+  .theme-dark {
+    --background: 0 0% 0%; /* #000000 */
+    --surface: 0 0% 6%; /* #101010 */
+    --primary: 170 70% 50%; /* #32E0C4 */
+    --secondary: 260 95% 75%; /* #BB86FC */
+    --text-primary: 0 0% 100%; /* #FFFFFF */
+    --text-secondary: 0 0% 63%; /* #A0A0A0 */
+    --border-color: 0 0% 13%; /* #212121 */
+  }
+
+  .theme-kek {
+    --background: 145 50% 12%; /* #0c2217 */
+    --surface: 145 50% 16%; /* #0f3622 */
+    --primary: 145 45% 26%; /* #246043 */
+    --secondary: 145 60% 18%; /* #11492d */
+    --text-primary: 155 65% 82%; /* #B0F3D5 */
+    --text-secondary: 155 25% 51%; /* #60A587 */
+    --border-color: 145 60% 18%; /* #11492d */
+  }
+
+  .theme-based {
+    --background: 217 60% 4%; /* #03070C */
+    --surface: 212 37% 9%; /* #0E1620 */
+    --primary: 160 100% 70%; /* #64FFDA */
+    --secondary: 170 70% 50%; /* #32E0C4 */
+    --text-primary: 210 27% 93%; /* #E6EDF3 */
+    --text-secondary: 220 18% 61%; /* #8892B0 */
+    --border-color: 211 30% 18%; /* #1E2D3D */
+  }
+
+  body {
+    background-color: hsl(var(--background));
+    color: hsl(var(--text-primary));
+  }
+} 
