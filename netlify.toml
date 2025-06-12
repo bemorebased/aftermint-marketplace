@@ -1,0 +1,24 @@
+[build]
+  base = "aftermint-frontend"
+  publish = "aftermint-frontend/.next"
+  command = "npm run build"
+
+[build.environment]
+  NEXT_PUBLIC_CHAIN_ID = "32323"
+  NEXT_PUBLIC_RPC_URL = "https://mainnet.basedaibridge.com/rpc/"
+  NEXT_PUBLIC_EXPLORER_URL = "https://explorer.bf1337.org"
+  NEXT_PUBLIC_LIFENODES_CONTRACT = "0x1639269Ed4fe6Ff1FC1218Cc1cB485313eb50A21"
+  NEXT_PUBLIC_MARKETPLACE_CONTRACT = "0xEdD719ECA832b667ec537D9c4d9e846FEAee7Ccc"
+
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/:splat"
+  status = 200
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+[functions]
+  directory = "aftermint-frontend/.netlify/functions" 
