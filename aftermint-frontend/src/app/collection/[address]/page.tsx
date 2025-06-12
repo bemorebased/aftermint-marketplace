@@ -3,18 +3,29 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { Search, Filter, Grid, List, BarChart3, Activity, ExternalLink, Copy, Share2, Heart, Star, ChevronDown, ArrowUpDown, Eye, Globe, Send, X, Zap, ArrowDownNarrowWide, ArrowUpNarrowWide, ArrowDown01, ArrowUp01, Grid2x2, Grid3x3, TrendingUp, Layers, Users, Tag, ArrowRightLeft } from 'lucide-react';
-import { Tab } from '@headlessui/react';
-import { useAccount } from 'wagmi';
-import { getBasedAIProvider, fetchCollectionFromExplorer } from '@/utils/blockchain';
-import { fetchCollectionInfo } from '@/utils/nft';
-import { marketplaceABI } from '@/lib/abi/marketplaceABI';
+import { 
+  TrendingUp, Tag, Filter, ChevronDown, ChevronUp, Globe, Send, Users, Layers, List, Copy, 
+  ArrowDownNarrowWide, ArrowUpNarrowWide, ArrowDown01, ArrowUp01, ShoppingBag, Search, UserCircle, Star, ExternalLink, Info, MoreHorizontal, ShieldCheck, Share2, X, User, Zap, Grid3x3, Grid2x2, Trash2, Plus, CheckCircle, XCircle, ArrowRightLeft
+} from 'lucide-react';
+import dynamic from 'next/dynamic';
+import ViewModeToggle from '@/components/ViewModeToggle';
+import DirectNFTCard from '../../direct-nft-card';
+import NFTInteractionModal from '@/components/NFTInteractionModal';
+import { fetchCollectionInfo, fetchMultipleNFTMetadata, fetchNFTsWithPagination, getBasedCollectionDetails, fetchNFTMetadata, calculateRarityScore } from '@/utils/nft';
+import { basedCollections } from '@/data/collections';
+import { getBasedAIProvider, MARKETPLACE_STORAGE_ADDRESS } from '@/lib/services/nftService';
+import { getCollectionActiveListings, makeOfferOnNFT } from '@/lib/services/marketplaceService';
+import { fetchCollectionFromExplorer, fetchCollectionActivity } from '@/utils/blockchain';
+import { formatNumber, formatCompactNumber, formatCurrency } from '@/utils/format';
 import { ethers } from 'ethers';
-import NftCard from '@/components/NftCard';
-import { captureError, trackApiCall } from '@/utils/errorTracking';
-import SafeImage from '@/components/SafeImage';
-import { getCollectionFloorPrice } from '@/lib/services/storageService';
+import { useRouter } from 'next/navigation';
+import { useAccount, useWalletClient } from 'wagmi';
+import { marketplaceABI } from '@/lib/abi/marketplaceABI';
+import { MARKETPLACE_CONTRACT_ADDRESS } from '@/lib/constants/contracts';
+import { getListingInfo } from '@/lib/services/marketplaceService';
+import { getCollectionActivity } from '@/lib/services/storageService';
+import toast from 'react-hot-toast';
+
 
 // Define a basic CollectionPageSkeleton component
 const CollectionPageSkeleton = () => {
@@ -91,8 +102,313 @@ const CollectionPageSkeleton = () => {
   );
 };
 
-// Collections data is now imported from @/data/collections properly
-// Removed duplicate collections data - now properly imports from @/data/collections
+// ALL COLLECTIONS DATA (Copied from /app/collection/page.tsx)
+const allCollections = [
+  {
+    name: "MockNFT",
+    contract: "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+    logo: "https://picsum.photos/id/237/200/200", // Random dog image
+    banner: "https://picsum.photos/id/1/1500/500", // Random banner
+    website: "",
+    twitter: "",
+    telegram: "",
+    description: "A collection of mock NFTs for testing the BasedAI marketplace",
+    floorPrice: 0.1, 
+    volume24h: 5,
+    volume7d: 35,
+    items: 100,
+    owners: 20,
+    chainId: 31337 // Hardhat local chain
+  },
+  {
+    name: "FancyFrogFamily",
+    contract: "0x949e7fe81c82d0b4f4c3e17f2ca1774848e4ae81",
+    logo: "https://www.fancyfrogfamily.com/images/logo/000_logo.png",
+    banner: "", // Can be empty or a URL
+    website: "https://www.fancyfrogfamily.com/",
+    twitter: "https://x.com/IT4Station",
+    telegram: "",
+    description: "A unique collection of Fancy Frogs residing on the blockchain.",
+    floorPrice: 0.5, // Example value
+    volume24h: 10,  // Example value
+    volume7d: 70,   // Example value
+    items: 1000,    // Example value
+    owners: 300,    // Example value
+    chainId: 32323  // BasedAI chain
+  },
+  {
+    name: "Based Pepe",
+    contract: "0xd819b90f7a7f8e85639671d2951285573bbf8771",
+    logo: "https://pbs.twimg.com/profile_images/1904884065343258624/Vba939p0_400x400.jpg",
+    banner: "https://pbs.twimg.com/profile_banners/1884239993247240192/1738075616/1500x500",
+    website: "",
+    twitter: "https://x.com/basedpepenft",
+    telegram: "",
+    description: "Pepe like you've never seen him before - fully based.",
+    floorPrice: 0.2,
+    volume24h: 25,
+    volume7d: 150,
+    items: 5000,
+    owners: 1200,
+    chainId: 32323
+  },
+  {
+    name: "Gang Game Evolution",
+    contract: "0xae6a76d106fd5f799a2501e1d563852da88c3db5",
+    logo: "https://pbs.twimg.com/profile_images/1910058281579528192/YYuJqVlF_400x400.jpg",
+    banner: "https://pbs.twimg.com/profile_banners/1906940747347070976/1743485575/1500x500",
+    website: "gangamevolutionbased.online",
+    twitter: "https://x.com/GanGamEvolution",
+    telegram: "https://t.co/DOIPPEYBNF",
+    description: "Evolve your gang members in this blockchain-based game.",
+    floorPrice: 1.2,
+    volume24h: 50,
+    volume7d: 300,
+    items: 2500,
+    owners: 800,
+    chainId: 32323
+  },
+  {
+    name: "LifeNodes",
+    contract: "0x1639269ed4fe6ff1fc1218cc1cb485313eb50a21",
+    logo: "https://pbs.twimg.com/profile_images/1912414230336180224/Q_K-eZn__400x400.jpg",
+    banner: "https://pbs.twimg.com/profile_banners/1890893149934858241/1745573721/1500x500",
+    website: "https://basedai.art/",
+    twitter: "https://x.com/BasedLifeNodes",
+    telegram: "https://t.me/lifenodes",
+    description: "LifeNodes is a collection of 777 unique digital assets that represent nodes in the BasedAI ecosystem. Holders enjoy exclusive benefits and reduced marketplace fees.",
+    floorPrice: 0.68,
+    volume24h: 14.5,
+    volume7d: 105.8,
+    items: 777,
+    owners: 420,
+    chainId: 32323
+  },
+  {
+    name: "KEKTECH",
+    contract: "0x40b6184b901334c0a88f528c1a0a1de7a77490f1",
+    logo: "https://pbs.twimg.com/profile_images/1907886210724364288/xNKmFj9s_400x400.jpg",
+    banner: "https://pbs.twimg.com/profile_banners/1907383327092359168/1743710496/1500x500",
+    website: "https://www.kektech.xyz/",
+    twitter: "https://x.com/KektechNFT",
+    telegram: "https://t.me/KEKTECH",
+    description: "KEKTECH is a futuristic collection of 1000 technologies from the KEK dimension, designed to bring laughter and innovation to the BasedAI ecosystem.",
+    floorPrice: 0.45,
+    volume24h: 8.2,
+    volume7d: 62.3,
+    items: 1000,
+    owners: 350,
+    chainId: 32323
+  },
+  {
+    name: "Test Taco",
+    contract: "0xa8a1087c73e9d6980b42df91149f96b99f75970e",
+    logo: "https://3oh.myfilebase.com/ipfs/QmSK8KA8UbDYWBA5qA6BhabC6xwoc61VtyhrFmeoQ3b5QW.png",
+    banner: "https://www.nachonft.xyz/headers/test-tacos.png",
+    website: "nachonft.xyz",
+    twitter: "https://x.com/nachonft_xyz",
+    telegram: "",
+    description: "Deliciously digital tacos, each one unique.",
+    floorPrice: 0.1,
+    volume24h: 5,
+    volume7d: 25,
+    items: 500,
+    owners: 150,
+    chainId: 32323
+  },
+  {
+    name: "BasedBeasts",
+    contract: "0xd4b1516eea9ccd966629c2972dab8683069ed7bc",
+    logo: "https://ipfs.io/ipfs/QmZH1A4CWbqh9b1ueCUibUYZawDPy4GRkxXqKpujwvW7PM",
+    banner: "https://pbs.twimg.com/profile_banners/1743117866184929280/1742407630/1500x500",
+    website: "https://www.basedbeasts.xyz/",
+    twitter: "https://x.com/TheDiscoFrog",
+    telegram: "",
+    description: "Wild beasts from the Based dimension.",
+    floorPrice: 0.75,
+    volume24h: 30,
+    volume7d: 200,
+    items: 888,
+    owners: 400,
+    chainId: 32323
+  },
+  {
+    name: "PepperCorn Genesis",
+    contract: "0xa0c2262735c1872493c92ec39aff0d9b6894d8fd",
+    logo: "https://pbs.twimg.com/profile_images/1912790640988946433/93LxnMNB_400x400.jpg",
+    banner: "https://pbs.twimg.com/profile_banners/1908148796162445312/1744906164/1500x500",
+    website: "",
+    twitter: "https://x.com/PepperCorn15953",
+    telegram: "https://t.me/peppercornisgudcoin",
+    description: "The genesis collection of PepperCorn NFTs.",
+    floorPrice: 0.3,
+    volume24h: 12,
+    volume7d: 80,
+    items: 1200,
+    owners: 500,
+    chainId: 32323
+  },
+  {
+    name: "Dank Pepes",
+    contract: "0x92c2075f517890ed333086f3c4e2bfc3ebf57b5d",
+    logo: "https://pbs.twimg.com/profile_images/1904732858323009536/TIWjPpin_400x400.jpg",
+    banner: "https://pbs.twimg.com/profile_banners/1900002904377102336/1745118780/1500x500",
+    website: "dankpepes.io",
+    twitter: "https://x.com/dank_pepes",
+    telegram: "The Dank Lounge",
+    description: "The Dank Pepes collection features 2000 of the rarest and most valuable Pepes in the metaverse. Each Pepe is unique and brings its own special meme energy to the BasedAI network.",
+    floorPrice: 0.32,
+    volume24h: 5.7,
+    volume7d: 38.5,
+    items: 2000,
+    owners: 800,
+    chainId: 32323
+  },
+  {
+    name: "PixelPepes",
+    contract: "0x22af27d00c53c0fba14446958864db7e3fe0852c",
+    logo: "https://pbs.twimg.com/profile_images/1915049463825018881/2RLzSbBj_400x400.jpg",
+    banner: "https://pbs.twimg.com/profile_banners/1914470955058954240/1745335435/1500x500",
+    website: "",
+    twitter: "https://x.com/pxlpepes",
+    telegram: "",
+    description: "Pixelated Pepes for the discerning collector.",
+    floorPrice: 0.15,
+    volume24h: 7,
+    volume7d: 40,
+    items: 3000,
+    owners: 900,
+    chainId: 32323
+  },
+  {
+    name: "Peps",
+    contract: "0xd81dcfbb84c6a29c0c074f701eceddf6cba7877f",
+    logo: "https://pbs.twimg.com/profile_images/1903806957292810240/ur3Xm_Ax_400x400.jpg",
+    banner: "https://pbs.twimg.com/profile_banners/1355098383774605313/1742737936/1500x500",
+    website: "",
+    twitter: "https://x.com/RealPeposhi",
+    telegram: "",
+    description: "A collection of Peps with various traits.",
+    floorPrice: 0.05,
+    volume24h: 3,
+    volume7d: 20,
+    items: 10000,
+    owners: 2500,
+    chainId: 32323
+  },
+  {
+    name: "KEKISTANIOS",
+    contract: "0x2f3df3922990e63a239d712964795efd9a150dd1",
+    logo: "https://pbs.twimg.com/profile_images/1896681606078750720/UiiHVSXO_400x400.jpg",
+    banner: "https://pbs.twimg.com/profile_banners/1896680553086115840/1741045445/1500x500",
+    website: "",
+    twitter: "https://x.com/kekistanio62517",
+    telegram: "",
+    description: "Warriors from the great land of Kekistan.",
+    floorPrice: 0.25,
+    volume24h: 9,
+    volume7d: 65,
+    items: 1500,
+    owners: 600,
+    chainId: 32323
+  },
+  {
+    name: "CosmicPond",
+    contract: "0xd36199215717f858809b0e62441c1f81adbf3d2c",
+    logo: "https://pbs.twimg.com/profile_images/1898913093465337856/p-bGc3Mq_400x400.jpg",
+    banner: "https://pbs.twimg.com/profile_banners/1898909967027146752/1741571137/1500x500",
+    website: "https://cosmicpond.net/",
+    twitter: "https://x.com/CosmicPondNFT",
+    telegram: "https://t.me/CosmicPond",
+    description: "Explore the mysteries of the Cosmic Pond.",
+    floorPrice: 0.8,
+    volume24h: 18,
+    volume7d: 120,
+    items: 600,
+    owners: 250,
+    chainId: 32323
+  },
+  {
+    name: "The Based Man Collection",
+    contract: "0x853efb327ea5d8766265b78c5b9092e2a85a8f70",
+    logo: "https://pbs.twimg.com/media/GmeQSf5WoAAwvUo?format=jpg&name=large",
+    banner: "https://pbs.twimg.com/media/Gn2D7tfXIAALZwW?format=png&name=large",
+    website: "",
+    twitter: "https://x.com/carpetfrawg",
+    telegram: "",
+    description: "The official collection of The Based Man.",
+    floorPrice: 0.9,
+    volume24h: 22,
+    volume7d: 180,
+    items: 500,
+    owners: 200,
+    chainId: 32323
+  },
+  {
+    name: "Pepe Rocks",
+    contract: "0x44dF92D10E91fa4D7E9eAd9fF6A6224c88ae5152",
+    logo: "https://pbs.twimg.com/profile_images/1910144664059166720/6A7cs9EQ_400x400.jpg",
+    banner: "https://pbs.twimg.com/profile_banners/1910144452397821952/1744249064/1500x500",
+    website: "",
+    twitter: "https://x.com/RocksPepe",
+    telegram: "",
+    description: "Pepe, but as rocks. Seriously.",
+    floorPrice: 0.08,
+    volume24h: 4,
+    volume7d: 30,
+    items: 3333,
+    owners: 1000,
+    chainId: 32323
+  },
+  {
+    name: "Based Whales",
+    contract: "0xd480f4a34a1740a5b6fd2da0d3c6cc6a432b56f2",
+    logo: "https://pbs.twimg.com/profile_images/1904857423279775746/4t3KvYGx_400x400.jpg",
+    banner: "https://pbs.twimg.com/profile_banners/1904857193629048834/1742988775/1500x500",
+    website: "basedsea.xyz",
+    twitter: "https://x.com/basedsea_xyz",
+    telegram: "",
+    description: "Majestic whales of the Based Sea.",
+    floorPrice: 1.5,
+    volume24h: 40,
+    volume7d: 250,
+    items: 100,
+    owners: 70,
+    chainId: 32323
+  },
+  {
+    name: "Lil Coalies",
+    contract: "0x36003438a167d13043028d794290dda93fea1236",
+    logo: "https://pbs.twimg.com/profile_images/1915215931095265280/fckrzPoY_400x400.jpg",
+    banner: "https://pbs.twimg.com/profile_banners/1908363293020110848/1745458441/1500x500",
+    website: "https://lilcoalies.com/",
+    twitter: "https://x.com/LilCoalies",
+    telegram: "",
+    description: "Cute and collectible Coalies.",
+    floorPrice: 0.4,
+    volume24h: 15,
+    volume7d: 90,
+    items: 2222,
+    owners: 700,
+    chainId: 32323
+  },
+  {
+    name: "DEMWORLD",
+    contract: "0xaf024210fdb085fc73b3f1ca1d7d722574f0133b",
+    logo: "https://pbs.twimg.com/profile_images/1897011933347201024/_kV-yNOJ_400x400.jpg",
+    banner: "https://pbs.twimg.com/profile_banners/1897009617369989120/1741676552/1500x500",
+    website: "",
+    twitter: "https://x.com/THEDEMWORLD",
+    telegram: "",
+    description: "Enter DEMWORLD, a new reality on Based.",
+    floorPrice: 0.6,
+    volume24h: 20,
+    volume7d: 140,
+    items: 1800,
+    owners: 650,
+    chainId: 32323
+  }
+];
 
 // Mock data for collection - in a real app this would come from an API
 // const collections = { ... }; // REMOVE THIS OLD MOCK OBJECT
@@ -117,43 +433,17 @@ interface Collection {
 
 // Price formatting utility - updated to use our new formatting
 const formatPrice = (price: number): string => {
-  return `${price.toFixed(3)} BASED`;
-};
-
-// Function to get collection info from the hardcoded allCollections array
-const getCollectionInfo = (contractAddress: string): Collection | null => {
-  const normalizedAddress = contractAddress.toLowerCase();
+  if (price == null || isNaN(price)) return 'N/A';
   
-  // Import the proper collections data
-  const { basedCollections } = require('@/data/collections');
-  const collectionData = basedCollections.find(
-    (collection: any) => collection.id.toLowerCase() === normalizedAddress
-  );
-
-  if (!collectionData) {
-    console.log(`[getCollectionInfo] ❌ Collection not found for address: ${contractAddress}`);
-    return null;
+  // For cryptocurrency, show more precision for small amounts, less for large amounts
+  if (price < 1) {
+    return `𝔹${price.toFixed(3)}`;
+  } else if (price < 1000) {
+    return `𝔹${price.toFixed(2)}`;
+  } else {
+    // Use our formatNumber for large amounts with commas
+    return `𝔹${formatNumber(Math.round(price))}`;
   }
-
-  console.log(`[getCollectionInfo] ✅ Found collection:`, collectionData.name);
-  
-  // Transform the data to match our Collection interface
-  return {
-    name: collectionData.name,
-    contract: collectionData.id, // Use 'id' field from basedCollections
-    logo: collectionData.logoUrl, // Use 'logoUrl' field from basedCollections
-    banner: collectionData.bannerUrl, // Use 'bannerUrl' field from basedCollections
-    website: collectionData.website,
-    twitter: collectionData.twitter,
-    telegram: collectionData.telegram,
-    description: `Collection for ${collectionData.name}`, // basedCollections doesn't have description
-    floorPrice: collectionData.floorPrice, // This should be undefined for LifeNodes, which is correct
-    volume24h: collectionData.volume24h,
-    volume7d: 0, // basedCollections doesn't have volume7d
-    totalSupply: collectionData.items,
-    holders: collectionData.owners,
-    chainId: 32323 // BasedAI chain ID
-  };
 };
 
 // Sort options
@@ -259,8 +549,6 @@ const generateMockNFTs = (collectionData: Collection | undefined, count: number 
   });
 };
 
-
-
 // Enhanced function to fetch ALL NFTs with proper marketplace listing detection
 function CollectionPage({ params }: { params: { address: string } }) {
   const { address } = params;
@@ -319,20 +607,6 @@ function CollectionPage({ params }: { params: { address: string } }) {
     return `${address.slice(0, chars + 2)}...${address.slice(-chars)}`;
   };
 
-  const formatNumber = (num: number): string => {
-    if (num >= 1000000) {
-      return (num / 1000000).toFixed(1) + 'M';
-    }
-    if (num >= 1000) {
-      return (num / 1000).toFixed(1) + 'K';
-    }
-    return num.toString();
-  };
-
-  const formatPrice = (price: number): string => {
-    return price < 1 ? price.toFixed(3) : price.toFixed(1);
-  };
-
   const handleCopy = async (text: string) => {
     try {
       await navigator.clipboard.writeText(text);
@@ -371,136 +645,22 @@ function CollectionPage({ params }: { params: { address: string } }) {
     setCurrentPage(1);
   };
 
-  // Simplified function to fetch real NFTs without marketplace calls that are causing errors
-  const fetchRealNFTs = async () => {
-    if (!address) return;
-    
-    setIsLoadingNFTs(true);
-    setNfts([]);
-    
-    try {
-      console.log(`[CollectionPage] 🚀 Starting NFT fetch for ${address}`);
-      captureError({
-        type: 'api',
-        severity: 'low',
-        message: `Starting collection NFT fetch for ${address}`,
-        component: 'CollectionPage'
-      });
-      
-      // Step 1: Get basic collection info first (fast)
-      let collectionData = collection;
-      if (!collectionData) {
-        const collectionInfo = getCollectionInfo(address);
-        if (collectionInfo) {
-          collectionData = collectionInfo;
-          setCollection(collectionInfo);
-          console.log(`[CollectionPage] ✅ Collection info loaded:`, collectionInfo.name);
-        } else {
-          console.warn(`[CollectionPage] ⚠️ No collection info found for ${address}`);
-        }
-      }
-      
-      // Step 2: Use Explorer API to get ALL collection NFTs with pagination
-      const explorerUrl = `${process.env.NEXT_PUBLIC_EXPLORER_API_BASE || 'https://explorer.bf1337.org/api'}/v2/tokens/${address}/instances?type=ERC-721,ERC-404,ERC-1155&limit=1000`;
-      console.log(`[CollectionPage] 🔗 Fetching ALL NFTs from Explorer API: ${explorerUrl}`);
-      
-      const explorerData = await trackApiCall<any>(
-        explorerUrl,
-        { method: 'GET' },
-        'CollectionPage-fetchRealNFTs'
-      );
-      
-      console.log(`[CollectionPage] 📊 Explorer API response items count:`, explorerData.items?.length || 0);
-      
-      if (!explorerData.items || !Array.isArray(explorerData.items)) {
-        console.warn('[CollectionPage] ⚠️ Explorer returned no items array');
-        captureError({
-          type: 'api',
-          severity: 'medium',
-          message: 'Explorer API returned no items array',
-          component: 'CollectionPage',
-          additionalData: { explorerData }
-        });
-        setNfts([]);
-        setIsLoadingNFTs(false);
-        return;
-      }
-      
-      const nftCount = explorerData.items.length;
-      console.log(`[CollectionPage] ✅ Found ${nftCount} NFTs from Explorer API`);
-      
-      // Step 3: Process Explorer NFTs to match our format (NO MARKETPLACE CALLS TO AVOID ERRORS)
-      const processedNfts = explorerData.items.map((item: any) => ({
-        id: item.id || item.token_id,
-        tokenId: item.id || item.token_id,
-        name: item.metadata?.name || `${collectionData?.name || 'NFT'} #${item.id || item.token_id}`,
-        image: item.metadata?.image || `/placeholder-nft.png`,
-        attributes: item.metadata?.attributes || [],
-        contractAddress: address,
-        collection: collectionData || { name: 'Unknown Collection' },
-        rarity: null,
-        price: null,
-        isListed: false, // Temporarily disabled marketplace calls
-        owner: item.owner?.hash || null
-      }));
-      
-      console.log(`[CollectionPage] ✅ Processed ${processedNfts.length} NFTs for display`);
-      setNfts(processedNfts);
-      
-      captureError({
-        type: 'api',
-        severity: 'low',
-        message: `Successfully loaded ${processedNfts.length} NFTs for collection`,
-        component: 'CollectionPage',
-        additionalData: { nftCount: processedNfts.length }
-      });
-      
-    } catch (error: any) {
-      console.error('[CollectionPage] ❌ Error in fetchRealNFTs:', error);
-      
-      captureError({
-        type: 'api',
-        severity: 'high',
-        message: `Failed to fetch collection NFTs: ${error.message}`,
-        component: 'CollectionPage',
-        additionalData: { address, error: error.message }
-      });
-      
-      // Fallback to basic collection info
-      const collectionInfo = getCollectionInfo(address);
-      if (collectionInfo && !collection) {
-        setCollection(collectionInfo);
-      }
-      
-      setNfts([]);
-    } finally {
-      setIsLoadingNFTs(false);
-      console.log(`[CollectionPage] 🏁 fetchRealNFTs completed`);
-    }
-  };
-
   // Function to fetch collection activity
   const fetchActivityData = async () => {
+    if (!address) return;
+    
+    setActivityLoading(true);
     try {
-      setActivityLoading(true);
-      console.log(`[CollectionPage] 🔍 Fetching activity for collection ${address}`);
+      console.log(`[CollectionPage] Fetching collection activity for ${address}`);
       
-      // Simple placeholder activity - full implementation would use transfers API
-      const activity = [
-        {
-          id: '1',
-          type: 'Sale',
-          item: 'Item #123',
-          price: '1.5',
-          date: new Date(),
-          user: '0x123...',
-          txHash: '0xabc123...'
-        }
-      ];
+      const provider = getBasedAIProvider();
+      const realActivity = await fetchCollectionActivity(address, 20);
       
-      setCollectionActivity(activity);
+      console.log(`[CollectionPage] Found ${realActivity.length} real activity items for collection`);
+      setCollectionActivity(realActivity);
+      
     } catch (error) {
-      console.error('Error fetching activity:', error);
+      console.error('[CollectionPage] Error fetching collection activity:', error);
       setCollectionActivity([]);
     } finally {
       setActivityLoading(false);
@@ -510,7 +670,169 @@ function CollectionPage({ params }: { params: { address: string } }) {
   // In-memory cache for NFT data to avoid refetching
   // Enhanced state management for collection page
 
-  // Note: Marketplace listing function temporarily removed to fix contract errors
+  // Optimized function to fetch real NFTs with batch operations
+  const fetchRealNFTs = async () => {
+    if (!address || !collection) return;
+    
+    setIsLoadingNFTs(true);
+    setNfts([]);
+    
+    try {
+      console.log(`[CollectionPage] 🚀 Starting optimized NFT fetch for ${collection.name}`);
+      
+      const provider = getBasedAIProvider();
+      
+      // Get active listings first (this is fast)
+      const activeListings = await getCollectionActiveListings(address, provider);
+      console.log(`[CollectionPage] 📋 Found ${activeListings.length} active listings`);
+      
+      // If user wants only listed items, just fetch those
+      if (showOnlyListed) {
+        console.log(`[CollectionPage] 🎯 Fetching only listed NFTs (${activeListings.length} items)`);
+        
+        const listedNFTs = await Promise.all(
+          activeListings.slice(0, 50).map(async (tokenId) => { // Limit to 50 for performance
+            try {
+              const metadata = await fetchNFTMetadata(address, tokenId.toString());
+              const listingInfo = await getListingInfo(address, tokenId, provider);
+              
+              return {
+                id: tokenId.toString(),
+                tokenId: tokenId.toString(),
+                name: metadata?.name || `${collection.name} #${tokenId}`,
+                image: metadata?.image || '/placeholder-nft.png',
+                collection: {
+                  name: collection.name,
+                  contract: address,
+                  logo: collection.logo
+                },
+                price: listingInfo ? ethers.formatUnits(listingInfo.price, 18) : undefined,
+                isListed: !!listingInfo,
+                owner: listingInfo?.seller || 'Unknown',
+                contractAddress: address,
+                attributes: metadata?.attributes || [],
+                rarityScore: metadata?.attributes ? calculateRarityScore(metadata.attributes) : 0
+              };
+            } catch (error) {
+              console.warn(`[CollectionPage] Error fetching listed NFT ${tokenId}:`, error instanceof Error ? error.message : String(error));
+              return null;
+            }
+          })
+        );
+        
+        const validListedNFTs = listedNFTs.filter(nft => nft !== null);
+        setNfts(validListedNFTs);
+        setIsLoadingNFTs(false);
+        return;
+      }
+      
+      // For all items, use a more efficient approach
+      console.log(`[CollectionPage] 📦 Fetching all NFTs with batch optimization`);
+      
+      // Get total supply efficiently
+      let totalSupply = collection.totalSupply || 777;
+      try {
+        const nftContract = new ethers.Contract(
+          address,
+          ["function totalSupply() view returns (uint256)"],
+          provider
+        );
+        const totalSupplyBN = await nftContract.totalSupply();
+        totalSupply = Number(totalSupplyBN);
+        console.log(`[CollectionPage] 📊 Total supply: ${totalSupply}`);
+      } catch (error) {
+        console.warn(`[CollectionPage] Could not get total supply, using default: ${totalSupply}`);
+      }
+      
+      // Fetch in smaller batches to avoid overwhelming the system
+      const BATCH_SIZE = 20;
+      const MAX_TOKENS = totalSupply; // Fetch all NFTs for proper floor calculation
+      const allNFTs: any[] = [];
+      
+      for (let i = 1; i <= MAX_TOKENS; i += BATCH_SIZE) {
+        const batchEnd = Math.min(i + BATCH_SIZE - 1, MAX_TOKENS);
+        console.log(`[CollectionPage] 🔄 Fetching batch ${i}-${batchEnd}`);
+        
+        const batchPromises = [];
+        for (let tokenId = i; tokenId <= batchEnd; tokenId++) {
+          batchPromises.push(
+            (async () => {
+              try {
+                // Check if this token is listed (fast check)
+                const isListed = activeListings.includes(tokenId);
+                
+                // Only fetch full metadata for listed items or first 50 items
+                if (isListed || tokenId <= 50) {
+                  const metadata = await fetchNFTMetadata(address, tokenId.toString());
+                  const listingInfo = isListed ? await getListingInfo(address, tokenId, provider) : null;
+                  
+                  return {
+                    id: tokenId.toString(),
+                    tokenId: tokenId.toString(),
+                    name: metadata?.name || `${collection.name} #${tokenId}`,
+                    image: metadata?.image || '/placeholder-nft.png',
+                    collection: {
+                      name: collection.name,
+                      contract: address,
+                      logo: collection.logo
+                    },
+                    price: listingInfo ? ethers.formatUnits(listingInfo.price, 18) : undefined,
+                    isListed: !!listingInfo,
+                    owner: listingInfo?.seller || 'Unknown',
+                    contractAddress: address,
+                    attributes: metadata?.attributes || [],
+                    rarityScore: metadata?.attributes ? calculateRarityScore(metadata.attributes) : 0
+                  };
+                } else {
+                  // For non-listed items beyond first 50, create minimal placeholder
+                  return {
+                    id: tokenId.toString(),
+                    tokenId: tokenId.toString(),
+                    name: `${collection.name} #${tokenId}`,
+                    image: '/placeholder-nft.png',
+                    collection: {
+                      name: collection.name,
+                      contract: address,
+                      logo: collection.logo
+                    },
+                    price: undefined,
+                    isListed: false,
+                    owner: 'Unknown',
+                    contractAddress: address,
+                    attributes: [],
+                    rarityScore: 0
+                  };
+                }
+              } catch (error) {
+                console.warn(`[CollectionPage] Error fetching token ${tokenId}:`, error instanceof Error ? error.message : String(error));
+                return null;
+              }
+            })()
+          );
+        }
+        
+        const batchResults = await Promise.all(batchPromises);
+        const validResults = batchResults.filter(nft => nft !== null);
+        allNFTs.push(...validResults);
+        
+        // Update UI progressively
+        setNfts([...allNFTs]);
+        
+        // Small delay to prevent overwhelming the system
+        if (i + BATCH_SIZE <= MAX_TOKENS) {
+          await new Promise(resolve => setTimeout(resolve, 100));
+        }
+      }
+      
+      console.log(`[CollectionPage] ✅ Completed fetching ${allNFTs.length} NFTs`);
+      
+    } catch (error) {
+      console.error('[CollectionPage] Error in fetchRealNFTs:', error);
+      setNfts([]);
+    } finally {
+      setIsLoadingNFTs(false);
+    }
+  };
 
   const fetchCollectionStats = async () => {
     if (!address) return;
@@ -520,61 +842,110 @@ function CollectionPage({ params }: { params: { address: string } }) {
       console.log(`[CollectionPage] Fetching collection statistics for ${address}`);
       const provider = getBasedAIProvider();
       
-      // Get collection info first
-      const collectionInfo = getCollectionInfo(address);
-      if (collectionInfo && !collection) {
-        setCollection(collectionInfo);
-      }
-      
-      // Get stats from explorer API and contract in parallel
-      const [explorerResponse, holdersData] = await Promise.all([
-        fetch(`https://explorer.bf1337.org/api/v2/addresses/${address}`).catch(() => null),
-        fetchCollectionFromExplorer(address).catch(() => null)
-      ]);
-      
+      // Get total supply from contract
       let realTotalSupply = null;
-      let realHoldersCount = null;
-      let floorPrice = null;
-      
-      // Process explorer data
-      if (explorerResponse?.ok) {
-        const explorerData = await explorerResponse.json();
-        if (explorerData?.token) {
-          realTotalSupply = parseInt(explorerData.token.total_supply) || null;
-          realHoldersCount = parseInt(explorerData.token.holders) || null;
+      try {
+        const nftContract = new ethers.Contract(
+          address,
+          ["function totalSupply() view returns (uint256)"],
+          provider
+        );
+        const totalSupplyBN = await nftContract.totalSupply();
+        realTotalSupply = Number(totalSupplyBN);
+        console.log(`[CollectionPage] Contract total supply: ${realTotalSupply}`);
+      } catch (error) {
+        console.warn(`[CollectionPage] Could not get total supply from contract:`, error);
+        
+        // Use known values for specific collections
+        if (address.toLowerCase() === '0x1639269ed4fe6ff1fc1218cc1cb485313eb50a21') {
+          realTotalSupply = 777; // LifeNodes
+          console.log(`[CollectionPage] Using known LifeNodes total supply: ${realTotalSupply}`);
         }
       }
       
-      // Use holders data as backup
-      if (holdersData) {
-        realTotalSupply = realTotalSupply || holdersData.totalSupply;
-        realHoldersCount = realHoldersCount || holdersData.uniqueHolders;
-      }
-      
-      // Get contract total supply as final fallback
-      if (!realTotalSupply) {
-        try {
-          const nftContract = new ethers.Contract(
-            address,
-            ["function totalSupply() view returns (uint256)"],
-            provider
-          );
-          const totalSupplyBN = await nftContract.totalSupply();
-          realTotalSupply = Number(totalSupplyBN);
-        } catch (error) {
-          // Use known values for specific collections
-          if (address.toLowerCase() === '0x1639269ed4fe6ff1fc1218cc1cb485313eb50a21') {
-            realTotalSupply = 777; // LifeNodes
+      // Get holders count from explorer API
+      let realHoldersCount = null;
+      try {
+        const response = await fetch(`https://explorer.bf1337.org/api/v2/addresses/${address}`);
+        if (response.ok) {
+          const explorerData = await response.json();
+          console.log(`[CollectionPage] Explorer response:`, explorerData);
+          
+          if (explorerData && explorerData.token && explorerData.token.holders) {
+            realHoldersCount = parseInt(explorerData.token.holders) || null;
+            console.log(`[CollectionPage] Real holders count: ${realHoldersCount}`);
+          }
+          
+          // If we didn't get total supply from contract, try explorer
+          if (!realTotalSupply && explorerData.token && explorerData.token.total_supply) {
+            realTotalSupply = parseInt(explorerData.token.total_supply) || null;
+            console.log(`[CollectionPage] Explorer total supply: ${realTotalSupply}`);
           }
         }
+      } catch (error) {
+        console.warn(`[CollectionPage] Could not fetch from explorer API:`, error);
       }
       
-      // Get floor price efficiently (temporarily disabled due to provider requirements)
+      // Get floor price using BROADER scan to actually find listings
+      let floorPrice = null;
       try {
-        // floorPrice = await getCollectionFloorPrice(address, provider);
-        floorPrice = collection?.floorPrice || null; // Use static data for now
+        console.log(`[CollectionPage] Getting floor price for ${address} (broader scan)`);
+        
+        const marketplaceAddress = "0xEdD719ECA832b667ec537D9c4d9e846FEAee7Ccc";
+        const marketplaceContract = new ethers.Contract(
+          marketplaceAddress, 
+          marketplaceABI,
+          provider
+        );
+        
+        // COMPLETE floor price calculation - scan ALL tokens to find true floor
+        const scanLimit = realTotalSupply || 777; // Scan all tokens
+        const prices = [];
+        
+        console.log(`[CollectionPage] Scanning ALL ${scanLimit} tokens for floor price...`);
+        
+        // Scan in batches to find listings
+        const batchSize = 50;
+        for (let start = 1; start <= scanLimit; start += batchSize) {
+          const end = Math.min(start + batchSize - 1, scanLimit);
+          console.log(`[CollectionPage] Checking batch ${start}-${end} for listings...`);
+          
+          const batchPromises = [];
+          for (let tokenId = start; tokenId <= end; tokenId++) {
+            batchPromises.push(
+              marketplaceContract.getListing(address, tokenId)
+                .then((listing) => {
+                  if (listing.seller !== ethers.ZeroAddress && Number(listing.price) > 0) {
+                    const priceInBased = parseFloat(ethers.formatEther(listing.price));
+                    console.log(`[CollectionPage] ✅ Found listing: Token ${tokenId} = ${priceInBased} BASED`);
+                    return priceInBased;
+                  }
+                  return null;
+                })
+                .catch(() => null)
+            );
+          }
+          
+          const batchResults = await Promise.all(batchPromises);
+          const validPrices = batchResults.filter(price => price !== null);
+          prices.push(...validPrices);
+          
+          // Early exit if we found enough listings
+          if (prices.length >= 5) {
+            console.log(`[CollectionPage] Found ${prices.length} listings, stopping scan early`);
+            break;
+          }
+        }
+        
+        if (prices.length > 0) {
+          floorPrice = Math.min(...prices);
+          console.log(`[CollectionPage] ✅ Floor price: ${floorPrice} BASED (from ${prices.length} listings)`);
+          console.log(`[CollectionPage] All prices found: [${prices.join(', ')}]`);
+        } else {
+          console.log(`[CollectionPage] No active listings found in first ${scanLimit} tokens`);
+        }
       } catch (error) {
-        console.warn(`[CollectionPage] Could not get floor price:`, error);
+        console.error(`[CollectionPage] Error getting floor price:`, error);
       }
       
       // Update collection with real data
@@ -585,20 +956,12 @@ function CollectionPage({ params }: { params: { address: string } }) {
           holders: realHoldersCount || prev!.holders,
           floorPrice: floorPrice || prev!.floorPrice
         }));
+        console.log(`[CollectionPage] Updated collection stats:`, {
+          totalSupply: realTotalSupply,
+          holders: realHoldersCount,
+          floorPrice: floorPrice
+        });
       }
-      
-      // Update stats
-      setCollectionStats(prev => ({
-        ...prev,
-        totalSupply: realTotalSupply || prev.totalSupply || 0,
-        holders: realHoldersCount || prev.holders || 0
-      }));
-      
-      console.log(`[CollectionPage] ✅ Updated stats:`, {
-        totalSupply: realTotalSupply,
-        holders: realHoldersCount,
-        floorPrice: floorPrice
-      });
       
     } catch (error) {
       console.error(`[CollectionPage] Error fetching collection stats:`, error);
@@ -607,36 +970,66 @@ function CollectionPage({ params }: { params: { address: string } }) {
     }
   };
 
-  // Single effect to initialize everything
+  // Main effect to fetch NFTs when parameters change
   useEffect(() => {
-    if (!address) return;
-    
-    console.log(`[CollectionPage] 🔄 Initializing collection page for ${address}`);
-    setLoading(true); // Set loading at start
-    setError(null); // Clear any previous errors
-    
-    // Get basic collection info immediately
-    const collectionInfo = getCollectionInfo(address);
-    if (collectionInfo) {
-      setCollection(collectionInfo);
+    if (address && collection) {
+      console.log(`[CollectionPage] 🔄 Fetching NFTs for collection change`);
+      fetchRealNFTs();
     }
-    
-    // Fetch stats and NFTs in parallel and handle loading state
-    Promise.all([
-      fetchCollectionStats(),
-      fetchRealNFTs()
-    ]).finally(() => {
-      setLoading(false); // Always clear loading when done
-    });
-    
-  }, [address]); // FIXED: Only depend on address, not search/filter states
+  }, [address, collection, showOnlyListed, sortBy, searchQuery]);
 
   // Fetch activity when activity tab is selected 
   useEffect(() => {
-    if (currentTab === 'activity') {
+    if (currentTab === 'activity' && collectionActivity.length === 0 && !activityLoading) {
       fetchActivityData();
     }
-  }, [currentTab]);
+  }, [currentTab, address]);
+
+  // Fetch collection statistics when component mounts
+  useEffect(() => {
+    if (address && !statsLoading) {
+      fetchCollectionStats();
+    }
+  }, [address]);
+
+  // Fetch additional data from explorer API for holders and supply
+  useEffect(() => {
+    const fetchExplorerData = async () => {
+      if (!address) return;
+      
+      try {
+        console.log(`[CollectionPage] Fetching explorer data for ${address}`);
+        const explorerData = await fetchCollectionFromExplorer(address);
+        
+        if (explorerData) {
+          console.log(`[CollectionPage] ✅ Explorer data:`, explorerData);
+          
+          // Update collection with explorer data
+          setCollection(prev => prev ? {
+            ...prev,
+            totalSupply: explorerData.totalSupply || prev.totalSupply || 0,
+            holders: explorerData.owners || explorerData.uniqueHolders || prev.holders || 0,
+          } : null);
+          
+          // Update collection stats with proper data
+          setCollectionStats(prev => ({
+            ...prev,
+            totalSupply: explorerData.totalSupply || prev.totalSupply || 0,
+            holders: explorerData.owners || explorerData.uniqueHolders || prev.holders || 0
+          }));
+          
+          console.log(`[CollectionPage] 📊 Updated stats - Supply: ${explorerData.totalSupply}, Holders: ${explorerData.owners || explorerData.uniqueHolders}`);
+        }
+      } catch (error) {
+        console.error(`[CollectionPage] ❌ Error fetching explorer data:`, error);
+      }
+    };
+
+    // Only fetch once when address changes, not when collection changes
+    if (address) {
+      fetchExplorerData();
+    }
+  }, [address]); // Only depend on address, not collection
 
   // Apply sorting and filtering to NFTs
   const sortedAndFilteredNFTs = useMemo(() => {
@@ -1056,7 +1449,7 @@ function CollectionPage({ params }: { params: { address: string } }) {
         {currentTab === 'items' && (
           <>
             {/* NFT Grid - updated for new view modes */}
-            {isLoadingNFTs ? (
+            {loading ? (
               // Skeleton loaders for better UX during loading
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
                 {Array(36).fill(0).map((_, i) => (
@@ -1139,19 +1532,23 @@ function CollectionPage({ params }: { params: { address: string } }) {
                     : 'grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4' // 4 per row on large screens (based)
                 }`}>
                   {paginatedNFTs.map((nft) => (
-                    <NftCard 
+                    <DirectNFTCard 
                       key={nft.id || nft.tokenId} 
                       id={nft.tokenId || nft.id || 0}
+                      tokenId={nft.tokenId || nft.id || 0}
                       name={nft.name || `#${nft.tokenId}`}
                       image={nft.image || `https://picsum.photos/seed/${collection.contract}${nft.tokenId}/500/500`}
+                      owner={nft.owner || '0x0000000000000000000000000000000000000000'}
                       isListed={!!nft.price}
                       price={nft.price ? String(nft.price) : undefined}
+                      seller={nft.seller}
                       collection={{
                         name: collection.name || '',
-                        contract: collection.contract || '',
-                        logo: collection.logo
+                        contract: collection.contract || ''
                       }}
                       contractAddress={collection.contract}
+                      compact={viewMode === 'compact'}
+                      onInteract={handleNFTInteraction}
                     />
                   ))}
                 </div>
@@ -1159,7 +1556,7 @@ function CollectionPage({ params }: { params: { address: string } }) {
             )}
 
             {/* Pagination - keep existing pagination code unchanged */}
-            {!isLoadingNFTs && totalPages > 1 && (
+            {!loading && totalPages > 1 && (
               <div className="flex justify-center mt-8">
                 <div className="flex items-center gap-2">
                   <button 
@@ -1437,7 +1834,7 @@ function CollectionPage({ params }: { params: { address: string } }) {
                       setSweepHighlightIds(new Set());
                       setSweepCount(0);
                       setSweepMaxPrice('');
-                      console.log(`Sweep initiated for ${sweepCount} NFTs!`);
+                      toast.success(`Sweep initiated for ${sweepCount} NFTs!`);
                     }
                   }}
                   className="flex-1 px-4 py-2 bg-theme-primary text-black rounded-xl hover:bg-theme-primary/90 transition-colors disabled:opacity-50"
@@ -1451,8 +1848,7 @@ function CollectionPage({ params }: { params: { address: string } }) {
         </div>
       )}
 
-      {/* NFT Interaction Modal - temporarily disabled */}
-      {/*
+      {/* NFT Interaction Modal */}
       <NFTInteractionModal
         nft={selectedNFT}
         isOpen={isModalOpen}
@@ -1461,7 +1857,6 @@ function CollectionPage({ params }: { params: { address: string } }) {
           setSelectedNFT(null);
         }}
       />
-      */}
     </div>
   );
 }
