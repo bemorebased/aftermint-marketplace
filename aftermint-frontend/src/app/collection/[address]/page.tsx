@@ -914,6 +914,8 @@ function CollectionPage({ params }: { params: { address: string } }) {
     if (!address) return;
     
     console.log(`[CollectionPage] 🔄 Initializing collection page for ${address}`);
+    setLoading(true); // Set loading at start
+    setError(null); // Clear any previous errors
     
     // Get basic collection info immediately
     const collectionInfo = getCollectionInfo(address);
@@ -921,9 +923,13 @@ function CollectionPage({ params }: { params: { address: string } }) {
       setCollection(collectionInfo);
     }
     
-    // Fetch stats and NFTs in parallel
-    fetchCollectionStats();
-          fetchRealNFTs();
+    // Fetch stats and NFTs in parallel and handle loading state
+    Promise.all([
+      fetchCollectionStats(),
+      fetchRealNFTs()
+    ]).finally(() => {
+      setLoading(false); // Always clear loading when done
+    });
     
   }, [address]); // FIXED: Only depend on address, not search/filter states
 
