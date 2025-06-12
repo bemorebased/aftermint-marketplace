@@ -88,6 +88,38 @@ npm run build
 npm run start
 ```
 
+## 🤖 Background Agents & Automation
+
+**ACTIVE MONITORING ENABLED** with automated workflows:
+
+### 🔄 **Continuous Integration**
+- **Automated testing** on every push
+- **Security audits** with CodeQL analysis  
+- **Type checking** and linting validation
+- **Dependency vulnerability scanning**
+
+### 🚨 **Error Monitoring**
+- **Real-time health checks** every 30 minutes
+- **Automatic issue creation** for critical errors
+- **Console error detection** via Lighthouse
+- **Performance regression alerts**
+
+### 📊 **Performance Monitoring**
+- **Lighthouse audits** on every deployment
+- **Core Web Vitals tracking** (FCP, LCP, CLS)
+- **Accessibility and SEO scores**
+- **Performance regression detection**
+
+### 🔧 **Setup Instructions**
+1. **Vercel Integration**: Add these secrets to your GitHub repo:
+   - `VERCEL_TOKEN`: Your Vercel API token
+   - `VERCEL_ORG_ID`: Your Vercel organization ID  
+   - `VERCEL_PROJECT_ID`: Your Vercel project ID
+
+2. **Workflows Active**:
+   - `.github/workflows/ci.yml` - Main CI/CD pipeline
+   - `.github/workflows/error-monitoring.yml` - Automated error detection
+
 ## 🐛 Debugging
 
 ### Error Tracking Interface
