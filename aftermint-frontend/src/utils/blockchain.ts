@@ -8,6 +8,13 @@ const EXPLORER_API_BASE = 'https://explorer.bf1337.org/api';
 const EXPLORER_GRAPHQL = 'https://explorer.bf1337.org/graphql';
 const BASEDAI_RPC_URL = 'https://mainnet.basedaibridge.com/rpc/';
 
+/**
+ * Get BasedAI blockchain provider
+ */
+export function getBasedAIProvider() {
+  return new ethers.JsonRpcProvider(BASEDAI_RPC_URL);
+}
+
 // Type for holder data
 interface TokenHolder {
   address: {
