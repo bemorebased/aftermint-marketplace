@@ -91,313 +91,8 @@ const CollectionPageSkeleton = () => {
   );
 };
 
-// ALL COLLECTIONS DATA (Copied from /app/collection/page.tsx)
-const allCollections = [
-  {
-    name: "MockNFT",
-    contract: "0x5FbDB2315678afecb367f032d93F642f64180aa3",
-    logo: "https://picsum.photos/id/237/200/200", // Random dog image
-    banner: "https://picsum.photos/id/1/1500/500", // Random banner
-    website: "",
-    twitter: "",
-    telegram: "",
-    description: "A collection of mock NFTs for testing the BasedAI marketplace",
-    floorPrice: 0.1, 
-    volume24h: 5,
-    volume7d: 35,
-    items: 100,
-    owners: 20,
-    chainId: 31337 // Hardhat local chain
-  },
-  {
-    name: "FancyFrogFamily",
-    contract: "0x949e7fe81c82d0b4f4c3e17f2ca1774848e4ae81",
-    logo: "https://www.fancyfrogfamily.com/images/logo/000_logo.png",
-    banner: "", // Can be empty or a URL
-    website: "https://www.fancyfrogfamily.com/",
-    twitter: "https://x.com/IT4Station",
-    telegram: "",
-    description: "A unique collection of Fancy Frogs residing on the blockchain.",
-    floorPrice: 0.5, // Example value
-    volume24h: 10,  // Example value
-    volume7d: 70,   // Example value
-    items: 1000,    // Example value
-    owners: 300,    // Example value
-    chainId: 32323  // BasedAI chain
-  },
-  {
-    name: "Based Pepe",
-    contract: "0xd819b90f7a7f8e85639671d2951285573bbf8771",
-    logo: "https://pbs.twimg.com/profile_images/1904884065343258624/Vba939p0_400x400.jpg",
-    banner: "https://pbs.twimg.com/profile_banners/1884239993247240192/1738075616/1500x500",
-    website: "",
-    twitter: "https://x.com/basedpepenft",
-    telegram: "",
-    description: "Pepe like you've never seen him before - fully based.",
-    floorPrice: 0.2,
-    volume24h: 25,
-    volume7d: 150,
-    items: 5000,
-    owners: 1200,
-    chainId: 32323
-  },
-  {
-    name: "Gang Game Evolution",
-    contract: "0xae6a76d106fd5f799a2501e1d563852da88c3db5",
-    logo: "https://pbs.twimg.com/profile_images/1910058281579528192/YYuJqVlF_400x400.jpg",
-    banner: "https://pbs.twimg.com/profile_banners/1906940747347070976/1743485575/1500x500",
-    website: "gangamevolutionbased.online",
-    twitter: "https://x.com/GanGamEvolution",
-    telegram: "https://t.co/DOIPPEYBNF",
-    description: "Evolve your gang members in this blockchain-based game.",
-    floorPrice: 1.2,
-    volume24h: 50,
-    volume7d: 300,
-    items: 2500,
-    owners: 800,
-    chainId: 32323
-  },
-  {
-    name: "LifeNodes",
-    contract: "0x1639269ed4fe6ff1fc1218cc1cb485313eb50a21",
-    logo: "https://pbs.twimg.com/profile_images/1912414230336180224/Q_K-eZn__400x400.jpg",
-    banner: "https://pbs.twimg.com/profile_banners/1890893149934858241/1745573721/1500x500",
-    website: "https://basedai.art/",
-    twitter: "https://x.com/BasedLifeNodes",
-    telegram: "https://t.me/lifenodes",
-    description: "LifeNodes is a collection of 777 unique digital assets that represent nodes in the BasedAI ecosystem. Holders enjoy exclusive benefits and reduced marketplace fees.",
-    floorPrice: 0.68,
-    volume24h: 14.5,
-    volume7d: 105.8,
-    items: 777,
-    owners: 420,
-    chainId: 32323
-  },
-  {
-    name: "KEKTECH",
-    contract: "0x40b6184b901334c0a88f528c1a0a1de7a77490f1",
-    logo: "https://pbs.twimg.com/profile_images/1907886210724364288/xNKmFj9s_400x400.jpg",
-    banner: "https://pbs.twimg.com/profile_banners/1907383327092359168/1743710496/1500x500",
-    website: "https://www.kektech.xyz/",
-    twitter: "https://x.com/KektechNFT",
-    telegram: "https://t.me/KEKTECH",
-    description: "KEKTECH is a futuristic collection of 1000 technologies from the KEK dimension, designed to bring laughter and innovation to the BasedAI ecosystem.",
-    floorPrice: 0.45,
-    volume24h: 8.2,
-    volume7d: 62.3,
-    items: 1000,
-    owners: 350,
-    chainId: 32323
-  },
-  {
-    name: "Test Taco",
-    contract: "0xa8a1087c73e9d6980b42df91149f96b99f75970e",
-    logo: "https://3oh.myfilebase.com/ipfs/QmSK8KA8UbDYWBA5qA6BhabC6xwoc61VtyhrFmeoQ3b5QW.png",
-    banner: "https://www.nachonft.xyz/headers/test-tacos.png",
-    website: "nachonft.xyz",
-    twitter: "https://x.com/nachonft_xyz",
-    telegram: "",
-    description: "Deliciously digital tacos, each one unique.",
-    floorPrice: 0.1,
-    volume24h: 5,
-    volume7d: 25,
-    items: 500,
-    owners: 150,
-    chainId: 32323
-  },
-  {
-    name: "BasedBeasts",
-    contract: "0xd4b1516eea9ccd966629c2972dab8683069ed7bc",
-    logo: "https://ipfs.io/ipfs/QmZH1A4CWbqh9b1ueCUibUYZawDPy4GRkxXqKpujwvW7PM",
-    banner: "https://pbs.twimg.com/profile_banners/1743117866184929280/1742407630/1500x500",
-    website: "https://www.basedbeasts.xyz/",
-    twitter: "https://x.com/TheDiscoFrog",
-    telegram: "",
-    description: "Wild beasts from the Based dimension.",
-    floorPrice: 0.75,
-    volume24h: 30,
-    volume7d: 200,
-    items: 888,
-    owners: 400,
-    chainId: 32323
-  },
-  {
-    name: "PepperCorn Genesis",
-    contract: "0xa0c2262735c1872493c92ec39aff0d9b6894d8fd",
-    logo: "https://pbs.twimg.com/profile_images/1912790640988946433/93LxnMNB_400x400.jpg",
-    banner: "https://pbs.twimg.com/profile_banners/1908148796162445312/1744906164/1500x500",
-    website: "",
-    twitter: "https://x.com/PepperCorn15953",
-    telegram: "https://t.me/peppercornisgudcoin",
-    description: "The genesis collection of PepperCorn NFTs.",
-    floorPrice: 0.3,
-    volume24h: 12,
-    volume7d: 80,
-    items: 1200,
-    owners: 500,
-    chainId: 32323
-  },
-  {
-    name: "Dank Pepes",
-    contract: "0x92c2075f517890ed333086f3c4e2bfc3ebf57b5d",
-    logo: "https://pbs.twimg.com/profile_images/1904732858323009536/TIWjPpin_400x400.jpg",
-    banner: "https://pbs.twimg.com/profile_banners/1900002904377102336/1745118780/1500x500",
-    website: "dankpepes.io",
-    twitter: "https://x.com/dank_pepes",
-    telegram: "The Dank Lounge",
-    description: "The Dank Pepes collection features 2000 of the rarest and most valuable Pepes in the metaverse. Each Pepe is unique and brings its own special meme energy to the BasedAI network.",
-    floorPrice: 0.32,
-    volume24h: 5.7,
-    volume7d: 38.5,
-    items: 2000,
-    owners: 800,
-    chainId: 32323
-  },
-  {
-    name: "PixelPepes",
-    contract: "0x22af27d00c53c0fba14446958864db7e3fe0852c",
-    logo: "https://pbs.twimg.com/profile_images/1915049463825018881/2RLzSbBj_400x400.jpg",
-    banner: "https://pbs.twimg.com/profile_banners/1914470955058954240/1745335435/1500x500",
-    website: "",
-    twitter: "https://x.com/pxlpepes",
-    telegram: "",
-    description: "Pixelated Pepes for the discerning collector.",
-    floorPrice: 0.15,
-    volume24h: 7,
-    volume7d: 40,
-    items: 3000,
-    owners: 900,
-    chainId: 32323
-  },
-  {
-    name: "Peps",
-    contract: "0xd81dcfbb84c6a29c0c074f701eceddf6cba7877f",
-    logo: "https://pbs.twimg.com/profile_images/1903806957292810240/ur3Xm_Ax_400x400.jpg",
-    banner: "https://pbs.twimg.com/profile_banners/1355098383774605313/1742737936/1500x500",
-    website: "",
-    twitter: "https://x.com/RealPeposhi",
-    telegram: "",
-    description: "A collection of Peps with various traits.",
-    floorPrice: 0.05,
-    volume24h: 3,
-    volume7d: 20,
-    items: 10000,
-    owners: 2500,
-    chainId: 32323
-  },
-  {
-    name: "KEKISTANIOS",
-    contract: "0x2f3df3922990e63a239d712964795efd9a150dd1",
-    logo: "https://pbs.twimg.com/profile_images/1896681606078750720/UiiHVSXO_400x400.jpg",
-    banner: "https://pbs.twimg.com/profile_banners/1896680553086115840/1741045445/1500x500",
-    website: "",
-    twitter: "https://x.com/kekistanio62517",
-    telegram: "",
-    description: "Warriors from the great land of Kekistan.",
-    floorPrice: 0.25,
-    volume24h: 9,
-    volume7d: 65,
-    items: 1500,
-    owners: 600,
-    chainId: 32323
-  },
-  {
-    name: "CosmicPond",
-    contract: "0xd36199215717f858809b0e62441c1f81adbf3d2c",
-    logo: "https://pbs.twimg.com/profile_images/1898913093465337856/p-bGc3Mq_400x400.jpg",
-    banner: "https://pbs.twimg.com/profile_banners/1898909967027146752/1741571137/1500x500",
-    website: "https://cosmicpond.net/",
-    twitter: "https://x.com/CosmicPondNFT",
-    telegram: "https://t.me/CosmicPond",
-    description: "Explore the mysteries of the Cosmic Pond.",
-    floorPrice: 0.8,
-    volume24h: 18,
-    volume7d: 120,
-    items: 600,
-    owners: 250,
-    chainId: 32323
-  },
-  {
-    name: "The Based Man Collection",
-    contract: "0x853efb327ea5d8766265b78c5b9092e2a85a8f70",
-    logo: "https://pbs.twimg.com/media/GmeQSf5WoAAwvUo?format=jpg&name=large",
-    banner: "https://pbs.twimg.com/media/Gn2D7tfXIAALZwW?format=png&name=large",
-    website: "",
-    twitter: "https://x.com/carpetfrawg",
-    telegram: "",
-    description: "The official collection of The Based Man.",
-    floorPrice: 0.9,
-    volume24h: 22,
-    volume7d: 180,
-    items: 500,
-    owners: 200,
-    chainId: 32323
-  },
-  {
-    name: "Pepe Rocks",
-    contract: "0x44dF92D10E91fa4D7E9eAd9fF6A6224c88ae5152",
-    logo: "https://pbs.twimg.com/profile_images/1910144664059166720/6A7cs9EQ_400x400.jpg",
-    banner: "https://pbs.twimg.com/profile_banners/1910144452397821952/1744249064/1500x500",
-    website: "",
-    twitter: "https://x.com/RocksPepe",
-    telegram: "",
-    description: "Pepe, but as rocks. Seriously.",
-    floorPrice: 0.08,
-    volume24h: 4,
-    volume7d: 30,
-    items: 3333,
-    owners: 1000,
-    chainId: 32323
-  },
-  {
-    name: "Based Whales",
-    contract: "0xd480f4a34a1740a5b6fd2da0d3c6cc6a432b56f2",
-    logo: "https://pbs.twimg.com/profile_images/1904857423279775746/4t3KvYGx_400x400.jpg",
-    banner: "https://pbs.twimg.com/profile_banners/1904857193629048834/1742988775/1500x500",
-    website: "basedsea.xyz",
-    twitter: "https://x.com/basedsea_xyz",
-    telegram: "",
-    description: "Majestic whales of the Based Sea.",
-    floorPrice: 1.5,
-    volume24h: 40,
-    volume7d: 250,
-    items: 100,
-    owners: 70,
-    chainId: 32323
-  },
-  {
-    name: "Lil Coalies",
-    contract: "0x36003438a167d13043028d794290dda93fea1236",
-    logo: "https://pbs.twimg.com/profile_images/1915215931095265280/fckrzPoY_400x400.jpg",
-    banner: "https://pbs.twimg.com/profile_banners/1908363293020110848/1745458441/1500x500",
-    website: "https://lilcoalies.com/",
-    twitter: "https://x.com/LilCoalies",
-    telegram: "",
-    description: "Cute and collectible Coalies.",
-    floorPrice: 0.4,
-    volume24h: 15,
-    volume7d: 90,
-    items: 2222,
-    owners: 700,
-    chainId: 32323
-  },
-  {
-    name: "DEMWORLD",
-    contract: "0xaf024210fdb085fc73b3f1ca1d7d722574f0133b",
-    logo: "https://pbs.twimg.com/profile_images/1897011933347201024/_kV-yNOJ_400x400.jpg",
-    banner: "https://pbs.twimg.com/profile_banners/1897009617369989120/1741676552/1500x500",
-    website: "",
-    twitter: "https://x.com/THEDEMWORLD",
-    telegram: "",
-    description: "Enter DEMWORLD, a new reality on Based.",
-    floorPrice: 0.6,
-    volume24h: 20,
-    volume7d: 140,
-    items: 1800,
-    owners: 650,
-    chainId: 32323
-  }
-];
+// Collections data is now imported from @/data/collections properly
+// Removed duplicate collections data - now properly imports from @/data/collections
 
 // Mock data for collection - in a real app this would come from an API
 // const collections = { ... }; // REMOVE THIS OLD MOCK OBJECT
@@ -428,8 +123,11 @@ const formatPrice = (price: number): string => {
 // Function to get collection info from the hardcoded allCollections array
 const getCollectionInfo = (contractAddress: string): Collection | null => {
   const normalizedAddress = contractAddress.toLowerCase();
-  const collectionData = allCollections.find(
-    collection => collection.contract.toLowerCase() === normalizedAddress
+  
+  // Import the proper collections data
+  const { basedCollections } = require('@/data/collections');
+  const collectionData = basedCollections.find(
+    collection => collection.id.toLowerCase() === normalizedAddress
   );
 
   if (!collectionData) {
@@ -442,19 +140,19 @@ const getCollectionInfo = (contractAddress: string): Collection | null => {
   // Transform the data to match our Collection interface
   return {
     name: collectionData.name,
-    contract: collectionData.contract,
-    logo: collectionData.logo,
-    banner: collectionData.banner,
+    contract: collectionData.id, // Use 'id' field from basedCollections
+    logo: collectionData.logoUrl, // Use 'logoUrl' field from basedCollections
+    banner: collectionData.bannerUrl, // Use 'bannerUrl' field from basedCollections
     website: collectionData.website,
     twitter: collectionData.twitter,
     telegram: collectionData.telegram,
-    description: collectionData.description,
-    floorPrice: collectionData.floorPrice,
+    description: `Collection for ${collectionData.name}`, // basedCollections doesn't have description
+    floorPrice: collectionData.floorPrice, // This should be undefined for LifeNodes, which is correct
     volume24h: collectionData.volume24h,
-    volume7d: collectionData.volume7d,
+    volume7d: 0, // basedCollections doesn't have volume7d
     totalSupply: collectionData.items,
     holders: collectionData.owners,
-    chainId: collectionData.chainId
+    chainId: 32323 // BasedAI chain ID
   };
 };
 
@@ -702,9 +400,9 @@ function CollectionPage({ params }: { params: { address: string } }) {
         }
       }
       
-      // Step 2: Use Explorer API to get collection NFTs with error tracking
-      const explorerUrl = `${process.env.NEXT_PUBLIC_EXPLORER_API_BASE || 'https://explorer.bf1337.org/api'}/v2/tokens/${address}/instances?type=ERC-721,ERC-404,ERC-1155`;
-      console.log(`[CollectionPage] 🔗 Fetching from Explorer API: ${explorerUrl}`);
+      // Step 2: Use Explorer API to get ALL collection NFTs with pagination
+      const explorerUrl = `${process.env.NEXT_PUBLIC_EXPLORER_API_BASE || 'https://explorer.bf1337.org/api'}/v2/tokens/${address}/instances?type=ERC-721,ERC-404,ERC-1155&limit=1000`;
+      console.log(`[CollectionPage] 🔗 Fetching ALL NFTs from Explorer API: ${explorerUrl}`);
       
       const explorerData = await trackApiCall<any>(
         explorerUrl,

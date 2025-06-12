@@ -179,6 +179,11 @@ const nextConfig = {
         hostname: '*.infura-ipfs.io', // Infura IPFS gateway
         pathname: '/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'bafybeicrsadgtje7n67eqon75d2ytrg4hb7sptcyj2b7lo4whi25wfjpbm.ipfs.io', // Specific LifeNodes IPFS hash
+        pathname: '/**',
+      },
     ],
   },
 };
