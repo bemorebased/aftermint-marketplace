@@ -10,7 +10,6 @@ import NftCard from '@/components/NftCard';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { getNFTsForOwner, getBasedAIProvider, LIFENODES_NFT_ADDRESS } from '@/lib/services/nftService';
 import { ethers } from 'ethers';
-import Image from 'next/image';
 import { formatEther } from 'ethers';
 import { fetchWalletBalance, fetchUserNFTs, fetchUserActivity } from '@/utils/blockchain';
 import { basedCollections } from '@/data/collections';
