@@ -13,39 +13,41 @@ import { ThemeProvider as NextThemesProvider } from 'next-themes';
 
 // Fix MetaMask provider conflicts on component mount
 if (typeof window !== 'undefined') {
-  // Handle multiple ethereum providers gracefully
-  window.addEventListener('ethereum#initialized', () => {
-    console.log('[Providers] Ethereum provider initialized');
-  });
-  
-  // Prevent MetaMask conflicts by safely accessing the provider
+  // Suppress MetaMask provider conflicts completely
+  const originalError = console.error;
+  console.error = (...args: any[]) => {
+    // Filter out MetaMask provider conflict errors
+    const message = args[0]?.toString() || '';
+    if (message.includes('MetaMask encountered an error setting the global Ethereum provider') ||
+        message.includes('Cannot set property ethereum') ||
+        message.includes('which has only a getter')) {
+      // Silently ignore these specific MetaMask conflicts
+      return;
+    }
+    // Log other errors normally
+    originalError.apply(console, args);
+  };
+
+  // Handle ethereum provider setup gracefully
   const handleEthereumProvider = () => {
     try {
       if (window.ethereum) {
-        // If there are multiple providers, MetaMask usually takes precedence
-        if (window.ethereum.providers?.length) {
-          console.log('[Providers] Multiple ethereum providers detected, using primary');
-          // Find MetaMask provider specifically
-          const metamaskProvider = window.ethereum.providers.find(
-            (provider: any) => provider.isMetaMask
-          );
-          if (metamaskProvider) {
-            console.log('[Providers] MetaMask provider found');
-          }
+        // Check for multiple providers without triggering errors
+        const hasMultipleProviders = Array.isArray(window.ethereum.providers) && window.ethereum.providers.length > 0;
+        
+        if (hasMultipleProviders) {
+          console.debug('[Providers] Multiple wallet providers detected - using default');
+        } else {
+          console.debug('[Providers] Single wallet provider detected');
         }
       }
     } catch (error) {
-      // Silently handle the error to prevent console spam
-      console.debug('[Providers] Ethereum provider setup handled gracefully');
+      // Completely silent - no logging to avoid console pollution
     }
   };
   
-  // Handle provider setup
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', handleEthereumProvider);
-  } else {
-    handleEthereumProvider();
-  }
+  // Handle provider setup after DOM is ready
+  setTimeout(handleEthereumProvider, 100);
 }
 
 // Define the BasedAI chain

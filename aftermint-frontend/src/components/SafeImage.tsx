@@ -1,7 +1,7 @@
 'use client';
 
 import Image from 'next/image';
-import { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 interface SafeImageProps {
   src: string;
@@ -26,15 +26,21 @@ export default function SafeImage({
   sizes,
   quality = 75
 }: SafeImageProps) {
-  const [imageSrc, setImageSrc] = useState(src);
+  const [imageSrc, setImageSrc] = useState<string | null>(null);
   const [hasError, setHasError] = useState(false);
 
+  // Initialize imageSrc from src prop in useEffect to avoid setState during render
+  useEffect(() => {
+    setImageSrc(src);
+    setHasError(false);
+  }, [src]);
+
   const handleError = () => {
-    if (!hasError) {
+    if (!hasError && imageSrc) {
       setHasError(true);
       // Try alternative IPFS gateways
-      if (src.includes('nursing-gray-opossum.myfilebase.com')) {
-        const cid = src.split('/ipfs/')[1];
+      if (imageSrc.includes('nursing-gray-opossum.myfilebase.com')) {
+        const cid = imageSrc.split('/ipfs/')[1];
         if (cid) {
           // Try ipfs.io gateway as fallback
           setImageSrc(`https://ipfs.io/ipfs/${cid}`);
@@ -47,25 +53,23 @@ export default function SafeImage({
     }
   };
 
-  // For unsafe domains, use regular img tag as fallback
-  if (hasError && imageSrc === '/placeholder-nft.png') {
+  // Show loading state while imageSrc is being set
+  if (!imageSrc) {
     return (
-      <img
-        src={imageSrc}
-        alt={alt}
-        width={width}
-        height={height}
-        className={className}
-        style={{ objectFit: 'cover' }}
-      />
+      <div 
+        className={`${className} bg-theme-surface animate-pulse flex items-center justify-center`} 
+        style={{ width: fill ? '100%' : width, height: fill ? '100%' : height }}
+      >
+        <span className="text-theme-text-secondary text-sm">Loading...</span>
+      </div>
     );
   }
 
   // For IPFS URLs that might not be configured, try direct img first
-  if (src.includes('nursing-gray-opossum.myfilebase.com') && !hasError) {
+  if (imageSrc.includes('nursing-gray-opossum.myfilebase.com')) {
     return (
       <img
-        src={src}
+        src={imageSrc}
         alt={alt}
         width={width}
         height={height}
