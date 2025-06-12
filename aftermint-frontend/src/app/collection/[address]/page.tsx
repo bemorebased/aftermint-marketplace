@@ -4,17 +4,17 @@ import React, { useState, useEffect, useMemo } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Search, Filter, Grid, List, BarChart3, Activity, ExternalLink, Copy, Share2, Heart, Star, ChevronDown, ArrowUpDown, Eye } from 'lucide-react';
+import { Search, Filter, Grid, List, BarChart3, Activity, ExternalLink, Copy, Share2, Heart, Star, ChevronDown, ArrowUpDown, Eye, Globe, Send, X, Zap, ArrowDownNarrowWide, ArrowUpNarrowWide, ArrowDown01, ArrowUp01, Grid2x2, Grid3x3, TrendingUp, Layers, Users, Tag, ArrowRightLeft } from 'lucide-react';
 import { Tab } from '@headlessui/react';
 import { useAccount } from 'wagmi';
 import { getBasedAIProvider, fetchCollectionFromExplorer } from '@/utils/blockchain';
 import { fetchCollectionInfo } from '@/utils/nft';
-import { NFTService } from '@/services/nftService';
-import { marketplaceABI } from '@/utils/abis';
+import { marketplaceABI } from '@/lib/abi/marketplaceABI';
 import { ethers } from 'ethers';
 import NftCard from '@/components/NftCard';
 import { captureError, trackApiCall } from '@/utils/errorTracking';
 import SafeImage from '@/components/SafeImage';
+import { getCollectionFloorPrice } from '@/lib/services/storageService';
 
 // Define a basic CollectionPageSkeleton component
 const CollectionPageSkeleton = () => {
@@ -561,113 +561,7 @@ const generateMockNFTs = (collectionData: Collection | undefined, count: number 
   });
 };
 
-// Simplified function to fetch real NFTs without marketplace calls that are causing errors
-const fetchRealNFTs = async () => {
-  if (!address) return;
-  
-  setIsLoadingNFTs(true);
-  setNfts([]);
-  
-  try {
-    console.log(`[CollectionPage] 🚀 Starting NFT fetch for ${address}`);
-    captureError({
-      type: 'api',
-      severity: 'low',
-      message: `Starting collection NFT fetch for ${address}`,
-      component: 'CollectionPage'
-    });
-    
-    // Step 1: Get basic collection info first (fast)
-    let collectionData = collection;
-    if (!collectionData) {
-      const collectionInfo = getCollectionInfo(address);
-      if (collectionInfo) {
-        collectionData = collectionInfo;
-        setCollection(collectionInfo);
-        console.log(`[CollectionPage] ✅ Collection info loaded:`, collectionInfo.name);
-      } else {
-        console.warn(`[CollectionPage] ⚠️ No collection info found for ${address}`);
-      }
-    }
-    
-    // Step 2: Use Explorer API to get collection NFTs with error tracking
-    const explorerUrl = `${process.env.NEXT_PUBLIC_EXPLORER_API_BASE || 'https://explorer.bf1337.org/api'}/v2/tokens/${address}/instances?type=ERC-721,ERC-404,ERC-1155`;
-    console.log(`[CollectionPage] 🔗 Fetching from Explorer API: ${explorerUrl}`);
-    
-    const explorerData = await trackApiCall<any>(
-      explorerUrl,
-      { method: 'GET' },
-      'CollectionPage-fetchRealNFTs'
-    );
-    
-    console.log(`[CollectionPage] 📊 Explorer API response items count:`, explorerData.items?.length || 0);
-    
-    if (!explorerData.items || !Array.isArray(explorerData.items)) {
-      console.warn('[CollectionPage] ⚠️ Explorer returned no items array');
-      captureError({
-        type: 'api',
-        severity: 'medium',
-        message: 'Explorer API returned no items array',
-        component: 'CollectionPage',
-        additionalData: { explorerData }
-      });
-      setNfts([]);
-      setIsLoadingNFTs(false);
-      return;
-    }
-    
-    const nftCount = explorerData.items.length;
-    console.log(`[CollectionPage] ✅ Found ${nftCount} NFTs from Explorer API`);
-    
-    // Step 3: Process Explorer NFTs to match our format (NO MARKETPLACE CALLS TO AVOID ERRORS)
-    const processedNfts = explorerData.items.map((item: any) => ({
-      id: item.id || item.token_id,
-      tokenId: item.id || item.token_id,
-      name: item.metadata?.name || `${collectionData?.name || 'NFT'} #${item.id || item.token_id}`,
-      image: item.metadata?.image || `/placeholder-nft.png`,
-      attributes: item.metadata?.attributes || [],
-      contractAddress: address,
-      collection: collectionData || { name: 'Unknown Collection' },
-      rarity: null,
-      price: null,
-      isListed: false, // Temporarily disabled marketplace calls
-      owner: item.owner?.hash || null
-    }));
-    
-    console.log(`[CollectionPage] ✅ Processed ${processedNfts.length} NFTs for display`);
-    setNfts(processedNfts);
-    
-    captureError({
-      type: 'api',
-      severity: 'low',
-      message: `Successfully loaded ${processedNfts.length} NFTs for collection`,
-      component: 'CollectionPage',
-      additionalData: { nftCount: processedNfts.length }
-    });
-    
-  } catch (error: any) {
-    console.error('[CollectionPage] ❌ Error in fetchRealNFTs:', error);
-    
-    captureError({
-      type: 'api',
-      severity: 'high',
-      message: `Failed to fetch collection NFTs: ${error.message}`,
-      component: 'CollectionPage',
-      additionalData: { address, error: error.message }
-    });
-    
-    // Fallback to basic collection info
-    const collectionInfo = getCollectionInfo(address);
-    if (collectionInfo && !collection) {
-      setCollection(collectionInfo);
-    }
-    
-    setNfts([]);
-  } finally {
-    setIsLoadingNFTs(false);
-    console.log(`[CollectionPage] 🏁 fetchRealNFTs completed`);
-  }
-};
+
 
 // Enhanced function to fetch ALL NFTs with proper marketplace listing detection
 function CollectionPage({ params }: { params: { address: string } }) {
@@ -727,6 +621,20 @@ function CollectionPage({ params }: { params: { address: string } }) {
     return `${address.slice(0, chars + 2)}...${address.slice(-chars)}`;
   };
 
+  const formatNumber = (num: number): string => {
+    if (num >= 1000000) {
+      return (num / 1000000).toFixed(1) + 'M';
+    }
+    if (num >= 1000) {
+      return (num / 1000).toFixed(1) + 'K';
+    }
+    return num.toString();
+  };
+
+  const formatPrice = (price: number): string => {
+    return price < 1 ? price.toFixed(3) : price.toFixed(1);
+  };
+
   const handleCopy = async (text: string) => {
     try {
       await navigator.clipboard.writeText(text);
@@ -763,6 +671,114 @@ function CollectionPage({ params }: { params: { address: string } }) {
     setSearchInputValue('');
     setSearchQuery('');
     setCurrentPage(1);
+  };
+
+  // Simplified function to fetch real NFTs without marketplace calls that are causing errors
+  const fetchRealNFTs = async () => {
+    if (!address) return;
+    
+    setIsLoadingNFTs(true);
+    setNfts([]);
+    
+    try {
+      console.log(`[CollectionPage] 🚀 Starting NFT fetch for ${address}`);
+      captureError({
+        type: 'api',
+        severity: 'low',
+        message: `Starting collection NFT fetch for ${address}`,
+        component: 'CollectionPage'
+      });
+      
+      // Step 1: Get basic collection info first (fast)
+      let collectionData = collection;
+      if (!collectionData) {
+        const collectionInfo = getCollectionInfo(address);
+        if (collectionInfo) {
+          collectionData = collectionInfo;
+          setCollection(collectionInfo);
+          console.log(`[CollectionPage] ✅ Collection info loaded:`, collectionInfo.name);
+        } else {
+          console.warn(`[CollectionPage] ⚠️ No collection info found for ${address}`);
+        }
+      }
+      
+      // Step 2: Use Explorer API to get collection NFTs with error tracking
+      const explorerUrl = `${process.env.NEXT_PUBLIC_EXPLORER_API_BASE || 'https://explorer.bf1337.org/api'}/v2/tokens/${address}/instances?type=ERC-721,ERC-404,ERC-1155`;
+      console.log(`[CollectionPage] 🔗 Fetching from Explorer API: ${explorerUrl}`);
+      
+      const explorerData = await trackApiCall<any>(
+        explorerUrl,
+        { method: 'GET' },
+        'CollectionPage-fetchRealNFTs'
+      );
+      
+      console.log(`[CollectionPage] 📊 Explorer API response items count:`, explorerData.items?.length || 0);
+      
+      if (!explorerData.items || !Array.isArray(explorerData.items)) {
+        console.warn('[CollectionPage] ⚠️ Explorer returned no items array');
+        captureError({
+          type: 'api',
+          severity: 'medium',
+          message: 'Explorer API returned no items array',
+          component: 'CollectionPage',
+          additionalData: { explorerData }
+        });
+        setNfts([]);
+        setIsLoadingNFTs(false);
+        return;
+      }
+      
+      const nftCount = explorerData.items.length;
+      console.log(`[CollectionPage] ✅ Found ${nftCount} NFTs from Explorer API`);
+      
+      // Step 3: Process Explorer NFTs to match our format (NO MARKETPLACE CALLS TO AVOID ERRORS)
+      const processedNfts = explorerData.items.map((item: any) => ({
+        id: item.id || item.token_id,
+        tokenId: item.id || item.token_id,
+        name: item.metadata?.name || `${collectionData?.name || 'NFT'} #${item.id || item.token_id}`,
+        image: item.metadata?.image || `/placeholder-nft.png`,
+        attributes: item.metadata?.attributes || [],
+        contractAddress: address,
+        collection: collectionData || { name: 'Unknown Collection' },
+        rarity: null,
+        price: null,
+        isListed: false, // Temporarily disabled marketplace calls
+        owner: item.owner?.hash || null
+      }));
+      
+      console.log(`[CollectionPage] ✅ Processed ${processedNfts.length} NFTs for display`);
+      setNfts(processedNfts);
+      
+      captureError({
+        type: 'api',
+        severity: 'low',
+        message: `Successfully loaded ${processedNfts.length} NFTs for collection`,
+        component: 'CollectionPage',
+        additionalData: { nftCount: processedNfts.length }
+      });
+      
+    } catch (error: any) {
+      console.error('[CollectionPage] ❌ Error in fetchRealNFTs:', error);
+      
+      captureError({
+        type: 'api',
+        severity: 'high',
+        message: `Failed to fetch collection NFTs: ${error.message}`,
+        component: 'CollectionPage',
+        additionalData: { address, error: error.message }
+      });
+      
+      // Fallback to basic collection info
+      const collectionInfo = getCollectionInfo(address);
+      if (collectionInfo && !collection) {
+        setCollection(collectionInfo);
+      }
+      
+      setNfts([]);
+    } finally {
+      setIsLoadingNFTs(false);
+      console.log(`[CollectionPage] 🏁 fetchRealNFTs completed`);
+    }
   };
 
   // Function to fetch collection activity
@@ -855,9 +871,10 @@ function CollectionPage({ params }: { params: { address: string } }) {
         }
       }
       
-      // Get floor price efficiently
+      // Get floor price efficiently (temporarily disabled due to provider requirements)
       try {
-        floorPrice = await getCollectionFloorPrice(address);
+        // floorPrice = await getCollectionFloorPrice(address, provider);
+        floorPrice = collection?.floorPrice || null; // Use static data for now
       } catch (error) {
         console.warn(`[CollectionPage] Could not get floor price:`, error);
       }
@@ -906,7 +923,7 @@ function CollectionPage({ params }: { params: { address: string } }) {
     
     // Fetch stats and NFTs in parallel
     fetchCollectionStats();
-    fetchRealNFTs();
+          fetchRealNFTs();
     
   }, [address]); // FIXED: Only depend on address, not search/filter states
 
@@ -1421,20 +1438,16 @@ function CollectionPage({ params }: { params: { address: string } }) {
                     <NftCard 
                       key={nft.id || nft.tokenId} 
                       id={nft.tokenId || nft.id || 0}
-                      tokenId={nft.tokenId || nft.id || 0}
                       name={nft.name || `#${nft.tokenId}`}
                       image={nft.image || `https://picsum.photos/seed/${collection.contract}${nft.tokenId}/500/500`}
-                      owner={nft.owner || '0x0000000000000000000000000000000000000000'}
                       isListed={!!nft.price}
                       price={nft.price ? String(nft.price) : undefined}
-                      seller={nft.seller}
                       collection={{
                         name: collection.name || '',
-                        contract: collection.contract || ''
+                        contract: collection.contract || '',
+                        logo: collection.logo
                       }}
                       contractAddress={collection.contract}
-                      compact={viewMode === 'compact'}
-                      onInteract={handleNFTInteraction}
                     />
                   ))}
                 </div>
@@ -1720,7 +1733,7 @@ function CollectionPage({ params }: { params: { address: string } }) {
                       setSweepHighlightIds(new Set());
                       setSweepCount(0);
                       setSweepMaxPrice('');
-                      toast.success(`Sweep initiated for ${sweepCount} NFTs!`);
+                      console.log(`Sweep initiated for ${sweepCount} NFTs!`);
                     }
                   }}
                   className="flex-1 px-4 py-2 bg-theme-primary text-black rounded-xl hover:bg-theme-primary/90 transition-colors disabled:opacity-50"
@@ -1734,7 +1747,8 @@ function CollectionPage({ params }: { params: { address: string } }) {
         </div>
       )}
 
-      {/* NFT Interaction Modal */}
+      {/* NFT Interaction Modal - temporarily disabled */}
+      {/*
       <NFTInteractionModal
         nft={selectedNFT}
         isOpen={isModalOpen}
@@ -1743,6 +1757,7 @@ function CollectionPage({ params }: { params: { address: string } }) {
           setSelectedNFT(null);
         }}
       />
+      */}
     </div>
   );
 }

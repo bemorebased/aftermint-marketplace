@@ -81,19 +81,24 @@ function getWagmiConfig() {
     const hasValidProjectId = process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID && 
                              process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID !== 'YOUR_PROJECT_ID_HERE';
     
-    wagmiConfig = getDefaultConfig({
+    const configOptions: any = {
       appName: 'AfterMint',
-      projectId: hasValidProjectId ? process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID! : undefined,
       chains: [basedAIChain],
       ssr: true,
-      // Only include WalletConnect if we have a valid project ID
-      ...(hasValidProjectId ? {} : {
-        wallets: [{
-          groupName: 'Popular',
-          wallets: []
-        }]
-      })
-    });
+    };
+
+    // Only add projectId if it's valid
+    if (hasValidProjectId) {
+      configOptions.projectId = process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID!;
+    } else {
+      // Add empty wallets config when no project ID
+      configOptions.wallets = [{
+        groupName: 'Popular',
+        wallets: []
+      }];
+    }
+
+    wagmiConfig = getDefaultConfig(configOptions);
   }
   return wagmiConfig;
 }
