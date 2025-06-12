@@ -1,32 +1,20 @@
 {
-  "version": 2,
-  "name": "aftermint-marketplace",
-  "builds": [
-    {
-      "src": "aftermint-frontend/package.json",
-      "use": "@vercel/next",
-      "config": {
-        "distDir": ".next"
-      }
+  "framework": "nextjs",
+  "buildCommand": "npm run build",
+  "devCommand": "npm run dev",
+  "installCommand": "npm install",
+  "outputDirectory": ".next",
+  "functions": {
+    "src/app/api/prices/route.ts": {
+      "maxDuration": 30
     }
-  ],
-  "routes": [
-    {
-      "src": "/(.*)",
-      "dest": "aftermint-frontend/$1"
-    }
-  ],
+  },
   "env": {
     "NEXT_PUBLIC_CHAIN_ID": "32323",
     "NEXT_PUBLIC_RPC_URL": "https://mainnet.basedaibridge.com/rpc/",
     "NEXT_PUBLIC_EXPLORER_URL": "https://explorer.bf1337.org",
     "NEXT_PUBLIC_LIFENODES_CONTRACT": "0x1639269Ed4fe6Ff1FC1218Cc1cB485313eb50A21",
     "NEXT_PUBLIC_MARKETPLACE_CONTRACT": "0xEdD719ECA832b667ec537D9c4d9e846FEAee7Ccc"
-  },
-  "functions": {
-    "aftermint-frontend/src/app/api/prices/route.ts": {
-      "maxDuration": 30
-    }
   },
   "headers": [
     {
