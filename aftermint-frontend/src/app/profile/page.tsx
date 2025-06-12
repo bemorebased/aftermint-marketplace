@@ -15,6 +15,7 @@ import { formatEther } from 'ethers';
 import { fetchWalletBalance, fetchUserNFTs, fetchUserActivity } from '@/utils/blockchain';
 import { basedCollections } from '@/data/collections';
 import { captureError } from '@/utils/errorTracking';
+import SafeImage from '@/components/SafeImage';
 
 // Helper function to check if a URL is from Imgur
 function isImgurUrl(url: string) {
@@ -452,11 +453,11 @@ function ProfilePageContent() {
                           <div className="glass-card rounded-lg overflow-hidden border border-theme-border hover:border-theme-border-hover transition-colors">
                             <div className="aspect-square relative overflow-hidden bg-theme-surface">
                               {nft.image && !isImgurUrl(nft.image) ? (
-                                <Image 
+                                <SafeImage 
                                   src={nft.image} 
                                   alt={nft.name || `NFT #${nft.tokenId}`} 
-                                  className="object-cover"
-                                  fill
+                                  className="object-cover w-full h-full"
+                                  fill={true}
                                   sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                                 />
                               ) : (

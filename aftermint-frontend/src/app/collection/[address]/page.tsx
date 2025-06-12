@@ -14,6 +14,7 @@ import { marketplaceABI } from '@/utils/abis';
 import { ethers } from 'ethers';
 import NftCard from '@/components/NftCard';
 import { captureError, trackApiCall } from '@/utils/errorTracking';
+import SafeImage from '@/components/SafeImage';
 
 // Define a basic CollectionPageSkeleton component
 const CollectionPageSkeleton = () => {
