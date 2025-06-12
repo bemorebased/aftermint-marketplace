@@ -127,7 +127,7 @@ const getCollectionInfo = (contractAddress: string): Collection | null => {
   // Import the proper collections data
   const { basedCollections } = require('@/data/collections');
   const collectionData = basedCollections.find(
-    collection => collection.id.toLowerCase() === normalizedAddress
+    (collection: any) => collection.id.toLowerCase() === normalizedAddress
   );
 
   if (!collectionData) {
