@@ -1798,34 +1798,40 @@ export const getTokenListing = async (
   }
 };
 
-// Function to get all listings for a collection using better APIs
+// Function to get all listings for a collection using blockchain data
 export const getCollectionListingsFromAPI = async (
   collectionAddress: string
 ): Promise<Array<{ tokenId: number; price: string; seller: string }>> => {
   try {
-    console.log(`[MarketplaceService] Getting collection listings from API for ${collectionAddress}`);
+    console.log(`[MarketplaceService] Getting collection listings from blockchain for ${collectionAddress}`);
     
-    const response = await fetch(`https://explorer.bf1337.org/api/contracts/tokenListing?collection=${collectionAddress}`);
-    if (!response.ok) {
-      throw new Error(`Failed to fetch collection listings: ${response.status}`);
+    // Use blockchain data instead of broken API
+    const provider = getBasedAIProvider();
+    const listings = await getCollectionActiveListings(collectionAddress, provider, 1000);
+    
+    const listingDetails = [];
+    
+    // Get listing details for each active listing
+    for (const tokenId of listings) {
+      try {
+        const listingInfo = await getListingInfo(collectionAddress, tokenId, provider);
+        if (listingInfo && listingInfo.price > 0n) {
+          listingDetails.push({
+            tokenId: tokenId,
+            price: ethers.formatEther(listingInfo.price),
+            seller: listingInfo.seller
+          });
+        }
+      } catch (error) {
+        console.log(`[MarketplaceService] Error getting listing for token ${tokenId}:`, error);
+      }
     }
     
-    const data = await response.json();
-    
-    if (data.listings && Array.isArray(data.listings)) {
-      return data.listings
-        .filter((listing: any) => listing.isActive !== false) // Only active listings
-        .map((listing: any) => ({
-          tokenId: listing.tokenId || listing.token_id,
-          price: listing.price || listing.amount,
-          seller: listing.seller || listing.owner
-        }));
-    }
-    
-    return [];
+    console.log(`[MarketplaceService] Found ${listingDetails.length} active listings for ${collectionAddress}`);
+    return listingDetails;
     
   } catch (error) {
-    console.error('[MarketplaceService] Error getting collection listings from API:', error);
+    console.error('[MarketplaceService] Error getting collection listings from blockchain:', error);
     return [];
   }
 };

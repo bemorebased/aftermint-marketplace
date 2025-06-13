@@ -184,6 +184,16 @@ const nextConfig = {
         hostname: 'bafybeicrsadgtje7n67eqon75d2ytrg4hb7sptcyj2b7lo4whi25wfjpbm.ipfs.io', // Specific LifeNodes IPFS hash
         pathname: '/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'cloudflare-ipfs.com', // Cloudflare IPFS gateway
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'cosmicpond-metadata.com',
+        pathname: '/**',
+      },
     ],
   },
 };

@@ -262,44 +262,38 @@ export default function CollectionsPage() {
   const [collectionFloorPrices, setCollectionFloorPrices] = useState<{[key: string]: number | null}>({});
   const [floorPricesLoading, setFloorPricesLoading] = useState(false);
   
-  // Fetch real floor prices for all collections on component mount
+  // Optimized floor price fetching - only fetch for visible collections
   useEffect(() => {
-    const fetchAllFloorPrices = async () => {
+    const fetchPriorityFloorPrices = async () => {
       setFloorPricesLoading(true);
-      console.log('[CollectionsPage] Starting to fetch floor prices for all collections...');
-        
-      // Process collections in smaller batches to avoid overwhelming the RPC
-      const batchSize = 3;
+      console.log('[CollectionsPage] Fetching floor prices for priority collections...');
+      
+      // Only fetch floor prices for the first 6 collections (visible on screen)
+      const priorityCollections = allCollections.slice(0, 6);
       const floorPricesMap: {[key: string]: number | null} = {};
       
-      for (let i = 0; i < allCollections.length; i += batchSize) {
-        const batch = allCollections.slice(i, i + batchSize);
-        console.log(`[CollectionsPage] Processing batch ${Math.floor(i/batchSize) + 1}/${Math.ceil(allCollections.length/batchSize)}`);
-        
-        const promises = batch.map(async collection => {
+      // Fetch in parallel for better performance
+      const promises = priorityCollections.map(async collection => {
+        try {
           const floorPrice = await fetchCollectionFloorPrice(collection.contract);
           return { contract: collection.contract, floorPrice };
-        });
-        
-        const results = await Promise.all(promises);
-        results.forEach(({ contract, floorPrice }) => {
-          floorPricesMap[contract] = floorPrice;
-        });
-        
-        // Update state with current batch results
-        setCollectionFloorPrices(prev => ({ ...prev, ...floorPricesMap }));
-        
-        // Delay between batches to avoid rate limiting
-        if (i + batchSize < allCollections.length) {
-          await new Promise(resolve => setTimeout(resolve, 1000));
+        } catch (error) {
+          console.warn(`Failed to fetch floor price for ${collection.name}:`, error);
+          return { contract: collection.contract, floorPrice: null };
         }
-      }
+      });
       
-      console.log('[CollectionsPage] Finished fetching floor prices:', floorPricesMap);
+      const results = await Promise.all(promises);
+      results.forEach(({ contract, floorPrice }) => {
+        floorPricesMap[contract] = floorPrice;
+      });
+      
+      setCollectionFloorPrices(floorPricesMap);
+      console.log('[CollectionsPage] ✅ Fetched priority floor prices:', floorPricesMap);
       setFloorPricesLoading(false);
     };
 
-    fetchAllFloorPrices();
+    fetchPriorityFloorPrices();
   }, []);
   
   // Enhanced filtering and sorting with real floor prices

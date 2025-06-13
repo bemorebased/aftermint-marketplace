@@ -281,6 +281,28 @@ class ErrorTracker {
     const summary = this.getErrorSummary();
     console.log('📊 Error Tracker Summary:', summary);
     console.table(this.errors.slice(-20)); // Show last 20 errors in table format
+    
+    // Add copy functionality for browser environments
+    if (typeof window !== 'undefined' && navigator.clipboard) {
+      const exportData = {
+        summary,
+        errors: this.errors,
+        exportedAt: new Date().toISOString(),
+        url: window.location.href,
+        userAgent: navigator.userAgent
+      };
+      
+      const exportText = JSON.stringify(exportData, null, 2);
+      
+      navigator.clipboard.writeText(exportText).then(() => {
+        console.log('📋 Error data copied to clipboard! Paste into any text editor to view detailed JSON.');
+      }).catch((err) => {
+        console.warn('📋 Failed to copy to clipboard:', err);
+        console.log('📋 Copy this error data manually:');
+        console.log(exportText);
+      });
+    }
+    
     return {
       summary,
       errors: this.errors
@@ -298,9 +320,39 @@ export const captureError = errorTracker.captureError.bind(errorTracker);
 export const getErrorSummary = errorTracker.getErrorSummary.bind(errorTracker);
 export const exportErrors = errorTracker.exportErrors.bind(errorTracker);
 
+// Standalone copy function for error data
+export const copyErrorsToClipboard = () => {
+  if (typeof window !== 'undefined' && navigator.clipboard) {
+    const summary = errorTracker.getErrorSummary();
+    const exportData = {
+      summary,
+      errors: errorTracker.getAllErrors(),
+      exportedAt: new Date().toISOString(),
+      url: window.location.href,
+      userAgent: navigator.userAgent
+    };
+    
+    const exportText = JSON.stringify(exportData, null, 2);
+    
+    navigator.clipboard.writeText(exportText).then(() => {
+      console.log('📋 ✅ Error data copied to clipboard! Paste into any text editor to view detailed JSON.');
+      return true;
+    }).catch((err) => {
+      console.warn('📋 ❌ Failed to copy to clipboard:', err);
+      console.log('📋 Copy this error data manually:');
+      console.log(exportText);
+      return false;
+    });
+  } else {
+    console.warn('📋 Clipboard API not available');
+    return false;
+  }
+};
+
 // Global error tracking functions for debugging
 if (typeof window !== 'undefined') {
   (window as any).getErrorSummary = getErrorSummary;
   (window as any).exportErrors = exportErrors;
+  (window as any).copyErrors = copyErrorsToClipboard;
   (window as any).clearErrors = errorTracker.clearErrors.bind(errorTracker);
 } 

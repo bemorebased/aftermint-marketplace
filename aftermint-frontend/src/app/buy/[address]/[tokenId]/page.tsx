@@ -22,7 +22,8 @@ const MARKETPLACE_ABI = [
   'function buyNFT(address nftContract, uint256 tokenId) external payable'
 ];
 
-export default function BuyNFTPage({ params }: { params: { address: string; tokenId: string } }) {
+export default async function BuyNFTPage({ params }: { params: Promise<{ address: string; tokenId: string }> }) {
+  const { address, tokenId } = await params;
   const { address: userAddress, isConnected } = useAccount();
   const { data: walletClient } = useWalletClient();
   const router = useRouter();
@@ -41,8 +42,8 @@ export default function BuyNFTPage({ params }: { params: { address: string; toke
         setLoading(true);
         setError(null);
         
-        const nftAddress = params.address;
-        const tokenId = Number(params.tokenId);
+        const nftAddress = address;
+        const tokenIdNum = Number(tokenId);
         
         // Connect to the blockchain
         const provider = new ethers.JsonRpcProvider('http://localhost:8545');
@@ -51,17 +52,17 @@ export default function BuyNFTPage({ params }: { params: { address: string; toke
         const marketplace = new ethers.Contract(marketplaceAddress, MARKETPLACE_ABI, provider);
         
         // Check if token exists
-        const owner = await nftContract.ownerOf(tokenId);
+        const owner = await nftContract.ownerOf(tokenIdNum);
         
         // Get token URI and collection info
         const [tokenURI, name, symbol] = await Promise.all([
-          nftContract.tokenURI(tokenId),
+          nftContract.tokenURI(tokenIdNum),
           nftContract.name(),
           nftContract.symbol()
         ]);
         
         // Check if token is listed
-        const listing = await marketplace.getListing(nftAddress, tokenId);
+        const listing = await marketplace.getListing(nftAddress, tokenIdNum);
         const isListed = listing && listing.seller !== ethers.ZeroAddress;
         
         if (!isListed) {
@@ -71,7 +72,7 @@ export default function BuyNFTPage({ params }: { params: { address: string; toke
         }
         
         // Fetch metadata
-        let metadata = { name: `Token #${tokenId}`, image: '', description: '', attributes: [] };
+        let metadata = { name: `Token #${tokenIdNum}`, image: '', description: '', attributes: [] };
         try {
           const response = await fetch(tokenURI);
           if (response.ok) {
@@ -82,8 +83,8 @@ export default function BuyNFTPage({ params }: { params: { address: string; toke
         }
         
         setNftData({
-          tokenId,
-          name: metadata.name || `Token #${tokenId}`,
+          tokenId: tokenIdNum,
+          name: metadata.name || `Token #${tokenIdNum}`,
           image: metadata.image || '',
           description: metadata.description || '',
           attributes: metadata.attributes || [],
@@ -112,7 +113,7 @@ export default function BuyNFTPage({ params }: { params: { address: string; toke
     }
     
     fetchNFTData();
-  }, [params.address, params.tokenId]);
+  }, [address, tokenId]);
   
   const handleBuy = async () => {
     if (!isConnected || !userAddress || !walletClient) {
@@ -129,8 +130,8 @@ export default function BuyNFTPage({ params }: { params: { address: string; toke
       setBuying(true);
       setError(null);
       
-      const nftAddress = params.address;
-      const tokenId = Number(params.tokenId);
+      const nftAddress = address;
+      const tokenIdNum = Number(tokenId);
       const marketplaceAddress = '0x8A791620dd6260079BF849Dc5567aDC3F2FdC318';
       
       // Create provider and signer - more defensive approach
@@ -156,7 +157,7 @@ export default function BuyNFTPage({ params }: { params: { address: string; toke
       const marketplace = new ethers.Contract(marketplaceAddress, MARKETPLACE_ABI, signer);
       
       // Execute buy transaction
-      const tx = await marketplace.buyNFT(nftAddress, tokenId, {
+      const tx = await marketplace.buyNFT(nftAddress, tokenIdNum, {
         value: listing.priceWei
       });
       
@@ -195,7 +196,7 @@ export default function BuyNFTPage({ params }: { params: { address: string; toke
           <h2 className="text-xl font-semibold mb-2">Error</h2>
           <p>{error}</p>
         </div>
-        <Link href={`/collection/${params.address}`} className="text-blue-400 hover:underline">
+        <Link href={`/collection/${address}`} className="text-blue-400 hover:underline">
           Back to collection
         </Link>
       </div>
@@ -292,7 +293,7 @@ export default function BuyNFTPage({ params }: { params: { address: string; toke
                 )}
                 
                 <Link
-                  href={`/collection/${params.address}`}
+                  href={`/collection/${address}`}
                   className="block text-center w-full py-3 px-6 bg-transparent border border-theme-border 
                     hover:bg-theme-surface text-theme-text-primary rounded-lg"
                 >

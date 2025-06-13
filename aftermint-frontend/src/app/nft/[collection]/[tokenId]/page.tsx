@@ -404,7 +404,8 @@ const checkMarketplaceApproval = async (
   return { approved, isAll };
 };
 
-export default function NFTDetailPage({ params }: { params: { collection: string; tokenId: string } }) {
+export default async function NFTDetailPage({ params }: { params: Promise<{ collection: string; tokenId: string }> }) {
+  const { collection: collectionParam, tokenId: tokenIdParam } = await params;
   const [nft, setNft] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('overview');
@@ -461,7 +462,8 @@ export default function NFTDetailPage({ params }: { params: { collection: string
   const [customExpiration, setCustomExpiration] = useState<string>('');
   const [useCustomExpiration, setUseCustomExpiration] = useState(false);
   
-  const { collection: collectionAddress, tokenId } = params;
+  const collectionAddress = collectionParam;
+  const tokenId = tokenIdParam;
   const { address: connectedAddress, isConnected } = useAccount();
   const { data: walletClient } = useWalletClient();
   const publicClient = usePublicClient();
@@ -701,10 +703,10 @@ export default function NFTDetailPage({ params }: { params: { collection: string
       }
     };
     
-    if (params.collection && params.tokenId) {
+    if (collectionAddress && tokenId) {
     fetchNFTData();
     } else {
-      console.error('[NFTDetailPage] Collection or TokenID missing in params:', params);
+      console.error('[NFTDetailPage] Collection or TokenID missing in params:', { collectionAddress, tokenId });
       toast.error('Invalid NFT URL.');
       setNft(null);
       setLoading(false);
@@ -715,7 +717,7 @@ export default function NFTDetailPage({ params }: { params: { collection: string
     return () => {
       isActive = false;
     };
-  }, [params.collection, params.tokenId, connectedAddress, publicClient, collectionAddress, tokenId]);
+  }, [collectionAddress, tokenId, connectedAddress, publicClient]);
   
   // Add a diagnostic logger that runs once we have NFT data loaded
   useEffect(() => {
@@ -1821,7 +1823,7 @@ Is Private: ${currentListing?.privateBuyer !== ethers.ZeroAddress}
       
       toast.loading('Cancelling offer...', { id: 'cancel-offer' });
       
-      await cancelOffer(params.collection, params.tokenId, walletClient);
+      await cancelOffer(collectionAddress, tokenId, walletClient);
       
       toast.success('Offer cancelled successfully!', { id: 'cancel-offer' });
       
@@ -2212,7 +2214,7 @@ Is Private: ${currentListing?.privateBuyer !== ethers.ZeroAddress}
               <div className="mb-6">
                 <div className="flex items-center gap-2 mb-2">
                   <Link 
-                    href={`/collection/${nft.collection?.contract || params.collection}`}
+                    href={`/collection/${nft.collection?.contract || collectionAddress}`}
                     className="text-sm text-theme-primary hover:underline"
                   >
                     {nft.collection?.name || "Unknown Collection"}
@@ -2602,10 +2604,10 @@ Is Private: ${currentListing?.privateBuyer !== ethers.ZeroAddress}
           isOpen={isListModalOpen}
           onClose={() => setIsListModalOpen(false)}
           nft={{
-            id: params.tokenId,
-            name: nft.name || `NFT #${params.tokenId}`,
+            id: tokenId,
+            name: nft.name || `NFT #${tokenId}`,
             image: nft.image || '/placeholder-image.png', // Provide a fallback
-            contractAddress: params.collection,
+            contractAddress: collectionAddress,
             collectionName: nft.collection?.name || 'Unknown Collection',
           }}
           onConfirmListing={handleConfirmListNft}

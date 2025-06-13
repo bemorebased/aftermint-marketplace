@@ -463,7 +463,7 @@ export default function Home() {
   const [viewMode, setViewMode] = useState<'collector' | 'trader' | 'compact'>('collector');
   const [activeTab, setActiveTab] = useState<'trending' | 'new' | 'popular'>('trending');
   const [loading, setLoading] = useState(true);
-  const [trendingNFTs, setTrendingNFTs] = useState<any[]>([]);
+  // Removed trendingNFTs state - now using featured collections for faster loading
   const [trendingCollections, setTrendingCollections] = useState<any[]>([]);
   
   useEffect(() => {
@@ -537,8 +537,7 @@ export default function Home() {
       
       setTrendingCollections(updatedTrending);
       
-      // Generate trending NFTs
-      setTrendingNFTs(generateTrendingNFTs());
+      // Featured collections are now loaded directly in the render - no state needed
       
       setLoading(false);
     };
@@ -557,20 +556,41 @@ export default function Home() {
     }
   };
 
-  const generateTrendingNFTs = () => {
+  // Simplified: Get featured collections instead of trending NFTs for faster loading
+  const getFeaturedCollections = () => {
+    // Return top 6 collections based on known popularity/importance
+    const featured = [
+      allCollections.find(c => c.name === "LifeNodes"),
+      allCollections.find(c => c.name === "Based Pepe"), 
+      allCollections.find(c => c.name === "KEKTECH"),
+      allCollections.find(c => c.name === "Gang Game Evolution"),
+      allCollections.find(c => c.name === "FancyFrogFamily"),
+      allCollections.find(c => c.name === "BasedBeasts")
+    ].filter(Boolean); // Remove any undefined entries
+    
+    console.log('[HomePage] ⚡ Using featured collections for fast loading');
+    return featured;
+  };
+
+  const generateMockTrendingNFTs = () => {
     const nfts = [];
     for (let i = 0; i < 6; i++) {
-      const collectionIndex = i % basedCollections.length;
-      const collection = basedCollections[collectionIndex];
+      const collectionIndex = i % allCollections.length;
+      const collection = allCollections[collectionIndex];
       nfts.push({
         id: i + 1,
         name: `${collection.name} #${Math.floor(Math.random() * 1000) + 1}`,
-        collection: collection,
-        image: `https://picsum.photos/seed/${collection.id}${i}/500/500`,
+        collection: {
+          name: collection.name,
+          contract: collection.contract,
+          logo: collection.logo
+        },
+        image: collection.logo || '/placeholder-nft.png',
         price: parseFloat((Math.random() * 2 + 0.1).toFixed(2)),
         lastSale: parseFloat((Math.random() * 1 + 0.1).toFixed(2)),
         tokenId: Math.floor(Math.random() * 1000) + 1,
         rarity: Math.floor(Math.random() * 100) + 1,
+        isListed: false
       });
     }
     return nfts;
@@ -579,18 +599,18 @@ export default function Home() {
   return (
     <>
       <div className="container mx-auto py-3 md:py-6">
-        {/* Trending NFTs Section */}
+        {/* Featured Collections Section */}
         <section className="mb-12 pt-4">
           <div>
             <div className="flex justify-between items-center mb-8">
               <div>
                 <div className="flex items-center gap-2">
-                  <TrendingUp size={20} className="text-theme-primary" />
-                  <h2 className="text-2xl font-bold text-theme-text-primary">Trending NFTs</h2>
+                  <Star size={20} className="text-theme-primary" />
+                  <h2 className="text-2xl font-bold text-theme-text-primary">Featured Collections</h2>
                 </div>
-                <p className="text-theme-text-secondary">Hot NFTs that are gaining traction</p>
+                <p className="text-theme-text-secondary">Top collections on BasedAI marketplace</p>
               </div>
-              <Link href="/trending" className="flex items-center gap-1 text-theme-primary hover:underline">
+              <Link href="/collection" className="flex items-center gap-1 text-theme-primary hover:underline">
                 View All <ArrowRight size={16} />
               </Link>
             </div>
@@ -605,8 +625,29 @@ export default function Home() {
                   </div>
                 ))
               ) : (
-                trendingNFTs.map((nft) => (
-                  <TrendingNftCard key={nft.id} nft={nft} />
+                getFeaturedCollections().map((collection, index) => (
+                  <Link 
+                    key={`featured-${index}`}
+                    href={`/collection/${collection.contract}`}
+                    className="group block"
+                  >
+                    <div className="bg-theme-surface border border-theme-border rounded-xl overflow-hidden hover:border-theme-primary transition-all duration-300 hover:scale-105">
+                      <div className="aspect-square relative">
+                        <div 
+                          className="w-full h-full bg-cover bg-center" 
+                          style={{ 
+                            backgroundImage: `url(${collection.logo})`,
+                            backgroundSize: 'cover',
+                            backgroundPosition: 'center',
+                          }}
+                        />
+                      </div>
+                      <div className="p-3">
+                        <h3 className="font-semibold text-sm text-theme-text-primary truncate">{collection.name}</h3>
+                        <p className="text-xs text-theme-text-secondary mt-1">Collection</p>
+                      </div>
+                    </div>
+                  </Link>
                 ))
               )}
             </div>

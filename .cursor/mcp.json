@@ -13,10 +13,11 @@
                 "OPENAI_API_KEY": "OPENAI_API_KEY_HERE",
                 "GOOGLE_API_KEY": "GOOGLE_API_KEY_HERE",
                 "XAI_API_KEY": "XAI_API_KEY_HERE",
-                "OPENROUTER_API_KEY": "OPENROUTER_API_KEY_HERE",
+                "OPENROUTER_API_KEY": "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",
                 "MISTRAL_API_KEY": "MISTRAL_API_KEY_HERE",
                 "AZURE_OPENAI_API_KEY": "AZURE_OPENAI_API_KEY_HERE",
-                "OLLAMA_API_KEY": "OLLAMA_API_KEY_HERE"
+                "OLLAMA_API_KEY": "llama3.1:8b",
+                "OLLAMA_BASE_URL": "http://localhost:11434"
             }
         }
     }

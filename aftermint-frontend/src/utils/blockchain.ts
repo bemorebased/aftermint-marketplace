@@ -259,11 +259,26 @@ export async function fetchCollectionFromExplorer(contractAddress: string) {
   try {
     console.log(`[fetchCollectionFromExplorer] 🔍 Fetching collection data for ${contractAddress}`);
     
+    // Fetch base token contract info (name, logo, description) from explorer v2 endpoint
+    let contractInfo: any = {};
+    try {
+      const resp = await axios.get(`${EXPLORER_API_BASE}/v2/tokens/${contractAddress}`);
+      if (resp.data && resp.data.token) {
+        contractInfo = resp.data.token;
+      }
+    } catch (infoErr) {
+      console.warn('[fetchCollectionFromExplorer] Could not fetch contract info:', infoErr);
+    }
+
     // Fetch holders data using the proper API
     const holdersData = await fetchCollectionHolders(contractAddress);
     
     const result = {
-      totalSupply: holdersData.totalSupply,
+      name: contractInfo.name || contractInfo.token_name || contractInfo.metadata?.name || contractInfo.symbol || 'Unknown Collection',
+      logo_url: contractInfo.logo_url || contractInfo.image_url || contractInfo.metadata?.image_url || '/placeholder-nft.png',
+      banner_image_url: contractInfo.banner_image_url || contractInfo.cover_image_url || '',
+      description: contractInfo.description || '',
+      totalSupply: holdersData.totalSupply || contractInfo.total_supply,
       uniqueHolders: holdersData.uniqueHolders,
       owners: holdersData.uniqueHolders, // Alias for compatibility
       holders: holdersData.holders
@@ -454,31 +469,58 @@ export async function fetchNFTTransfers(contractAddress: string, tokenId: string
 export async function fetchUserActivity(userAddress: string, limit: number = 50) {
   try {
     console.log(`[fetchUserActivity] 🔍 Fetching activity for ${userAddress}`);
-    
-    // Add a simple delay to prevent API spam
-    await new Promise(resolve => setTimeout(resolve, 100));
-    
-    // Use the NFT API endpoint to get transfers for the user
-    const response = await axios.get(
-      `${EXPLORER_API_BASE}/v2/addresses/${userAddress}/nft?type=ERC-721,ERC-404,ERC-1155`,
-      { timeout: 10000 } // 10 second timeout
+
+    if (!userAddress || !ethers.isAddress(userAddress)) {
+      throw new Error('Invalid user address');
+    }
+
+    // Try the dedicated token-transfers endpoint first (faster & richer)
+    const transfersResp = await axios.get(
+      `${EXPLORER_API_BASE}/v2/addresses/${userAddress}/token-transfers`,
+      { params: { limit } }
     );
-    
-    if (!response.data || !response.data.items) {
-      console.log(`[fetchUserActivity] No activity data found for ${userAddress}`);
+
+    if (transfersResp.data && Array.isArray(transfersResp.data.items)) {
+      const activity = transfersResp.data.items.map((t: any) => {
+        const received = t.to?.hash?.toLowerCase() === userAddress.toLowerCase();
+        const sent = t.from?.hash?.toLowerCase() === userAddress.toLowerCase();
+        const type = received ? 'Receive' : sent ? 'Send' : 'Transfer';
+        const priceBased = t.total?.value ? ethers.formatEther(t.total.value) : '0';
+        return {
+          id: t.tx_hash || `${t.token?.address}-${t.token_id}-${t.timestamp}`,
+          type,
+          item: t.token?.name ? `${t.token.name} #${t.token_id}` : `Token #${t.token_id}`,
+          price: priceBased,
+          date: t.timestamp ? new Date(t.timestamp) : new Date(),
+          collection: {
+            name: t.token?.name || 'Unknown',
+            logo: '/placeholder-nft.png'
+          },
+          tokenContract: t.token?.address,
+          tokenId: t.token_id
+        };
+      });
+
+      return activity.slice(0, limit);
+    }
+
+    // Fallback: use previous NFT listing method
+    console.log('[fetchUserActivity] Falling back to NFT list endpoint');
+    const fallback = await axios.get(
+      `${EXPLORER_API_BASE}/v2/addresses/${userAddress}/nft?type=ERC-721,ERC-404,ERC-1155`,
+      { params: { limit } }
+    );
+
+    if (!fallback.data || !fallback.data.items) {
       return [];
     }
-    
-    console.log(`[fetchUserActivity] ✅ Found ${response.data.items.length} NFTs for ${userAddress}`);
-    
-    // For now, we'll get the basic NFT data - in a full implementation you'd need 
-    // to fetch transfer details for each NFT to get the activity timeline
-    const activity = response.data.items.slice(0, limit).map((item: any) => ({
+
+    const activityFallback = fallback.data.items.slice(0, limit).map((item: any) => ({
       id: `${item.token?.address || 'unknown'}-${item.id || 'unknown'}`,
-      type: 'Transfer', // You'd determine this from transfer data
+      type: 'Transfer',
       item: item.metadata?.name || `Token #${item.id}`,
-      price: '0', // Would come from transfer/sale data
-      date: new Date(), // Would come from transfer timestamp
+      price: '0',
+      date: new Date(),
       collection: {
         name: item.token?.name || 'Unknown Collection',
         logo: '/placeholder-nft.png'
@@ -486,10 +528,87 @@ export async function fetchUserActivity(userAddress: string, limit: number = 50)
       tokenContract: item.token?.address,
       tokenId: item.id
     }));
-    
-    return activity;
+
+    return activityFallback;
   } catch (error) {
     console.error(`Error fetching user activity for ${userAddress}:`, error);
     return [];
   }
+}
+
+export async function fetchCollectionTokens(contractAddress: string, page: number = 1, limit: number = 100) {
+  if (!contractAddress) return { items: [], total: 0 };
+
+  try {
+    const resp = await axios.get(`${EXPLORER_API_BASE}/v2/tokens/${contractAddress}/instances`, {
+      params: { page, limit }
+    });
+
+    if (resp.data && Array.isArray(resp.data.items)) {
+      return {
+        items: resp.data.items,
+        total: resp.data.items.length
+      };
+    }
+  } catch (err) {
+    console.error('[fetchCollectionTokens] error:', err);
+  }
+
+  return { items: [], total: 0 };
+}
+
+export async function fetchAllCollectionTokens(contractAddress: string, limitPerPage: number = 50, maxSupply?: number) {
+  const allItems: any[] = [];
+  let hasMorePages = true;
+  let page = 1;
+  
+  console.log(`[fetchAllCollectionTokens] Starting to fetch tokens for ${contractAddress}${maxSupply ? ` (max supply: ${maxSupply})` : ''}`);
+  
+  // Calculate max pages based on supply if provided
+  const maxPages = maxSupply ? Math.ceil(maxSupply / limitPerPage) : 200;
+  
+  while (hasMorePages && page <= maxPages) {
+    try {
+      console.log(`[fetchAllCollectionTokens] Fetching page ${page}/${maxPages} with limit ${limitPerPage}`);
+      const { items } = await fetchCollectionTokens(contractAddress, page, limitPerPage);
+      
+      if (items.length === 0) {
+        console.log(`[fetchAllCollectionTokens] No items on page ${page}, stopping`);
+        hasMorePages = false;
+        break;
+      }
+      
+      allItems.push(...items);
+      console.log(`[fetchAllCollectionTokens] Page ${page}: Got ${items.length} items, total so far: ${allItems.length}`);
+      
+      // Stop if we've reached the max supply
+      if (maxSupply && allItems.length >= maxSupply) {
+        console.log(`[fetchAllCollectionTokens] Reached max supply (${maxSupply}), stopping`);
+        hasMorePages = false;
+        break;
+      }
+      
+      // If we got fewer items than the limit, this is the last page
+      if (items.length < limitPerPage) {
+        console.log(`[fetchAllCollectionTokens] Last page reached (${items.length} < ${limitPerPage})`);
+        hasMorePages = false;
+      }
+      
+      page++;
+      
+      // Add a small delay to avoid rate limiting
+      if (hasMorePages) {
+        await new Promise(resolve => setTimeout(resolve, 100));
+      }
+    } catch (error) {
+      console.error(`[fetchAllCollectionTokens] Error fetching page ${page}:`, error);
+      hasMorePages = false;
+    }
+  }
+  
+  // Trim to exact supply if provided
+  const finalItems = maxSupply ? allItems.slice(0, maxSupply) : allItems;
+  console.log(`[fetchAllCollectionTokens] ✅ Finished fetching ${finalItems.length} total tokens`);
+  console.log(`[fetchAllCollectionTokens] Sample token structure:`, finalItems[0]);
+  return finalItems;
 } 

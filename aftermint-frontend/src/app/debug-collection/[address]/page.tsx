@@ -19,7 +19,8 @@ const MARKETPLACE_ABI = [
   'function getListing(address nftContract, uint256 tokenId) external view returns (tuple(address seller, uint256 price, uint64 listedAt, uint64 expiresAt, address privateBuyer, address paymentToken))'
 ];
 
-export default function DebugCollectionPage({ params }: { params: { address: string } }) {
+export default async function DebugCollectionPage({ params }: { params: Promise<{ address: string }> }) {
+  const { address } = await params;
   const [collection, setCollection] = useState({ name: '', symbol: '' });
   const [nfts, setNfts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -31,13 +32,13 @@ export default function DebugCollectionPage({ params }: { params: { address: str
         setLoading(true);
         setError('');
         
-        console.log(`Fetching data for collection: ${params.address}`);
+        console.log(`Fetching data for collection: ${address}`);
         
         // Use BasedAI RPC URL only
         const provider = new ethers.JsonRpcProvider('https://mainnet.basedaibridge.com/rpc/');
         
         // Get the NFT contract
-        const nftContract = new ethers.Contract(params.address, ERC721_ABI, provider);
+        const nftContract = new ethers.Contract(address, ERC721_ABI, provider);
         
         // Hardcode the marketplace address
         const marketplaceAddress = '0x8A791620dd6260079BF849Dc5567aDC3F2FdC318';
@@ -51,7 +52,7 @@ export default function DebugCollectionPage({ params }: { params: { address: str
         } catch (e) {
           console.error('Error fetching collection info:', e);
           setCollection({ 
-            name: `Collection ${params.address.substring(0, 6)}...`,
+            name: `Collection ${address.substring(0, 6)}...`,
             symbol: 'NFT' 
           });
         }
@@ -69,7 +70,7 @@ export default function DebugCollectionPage({ params }: { params: { address: str
             // Check if token is listed
             let listingInfo = { isListed: false, price: '0' };
             try {
-              const listing = await marketplace.getListing(params.address, i);
+              const listing = await marketplace.getListing(address, i);
               if (listing && listing.seller !== ethers.ZeroAddress) {
                 listingInfo = {
                   isListed: true,
@@ -116,7 +117,7 @@ export default function DebugCollectionPage({ params }: { params: { address: str
     }
     
     fetchNFTs();
-  }, [params.address]);
+  }, [address]);
   
   return (
     <div className="container mx-auto p-4">
@@ -132,7 +133,7 @@ export default function DebugCollectionPage({ params }: { params: { address: str
         <>
           <div className="bg-gray-800 p-4 rounded-md mb-6">
             <h2 className="text-xl font-semibold">{collection.name} ({collection.symbol})</h2>
-            <p className="text-sm opacity-80">Contract: {params.address}</p>
+            <p className="text-sm opacity-80">Contract: {address}</p>
           </div>
           
           <h3 className="text-lg font-semibold mb-3">Available NFTs: {nfts.length}</h3>

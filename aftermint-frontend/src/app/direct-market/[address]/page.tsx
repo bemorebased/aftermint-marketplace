@@ -8,7 +8,8 @@ import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 
-export default function DirectMarketPage({ params }: { params: { address: string } }) {
+export default async function DirectMarketPage({ params }: { params: Promise<{ address: string }> }) {
+  const { address } = await params;
   const [collectionData, setCollectionData] = useState<CollectionData | null>(null);
   const [nfts, setNfts] = useState<NFTData[]>([]);
   const [loading, setLoading] = useState(true);
@@ -21,7 +22,7 @@ export default function DirectMarketPage({ params }: { params: { address: string
         setLoading(true);
         setError(null);
         
-        const data = await fetchCollectionWithNFTs(params.address);
+        const data = await fetchCollectionWithNFTs(address);
         if (data) {
         setCollectionData(data.collection);
         setNfts(data.nfts);
@@ -38,7 +39,7 @@ export default function DirectMarketPage({ params }: { params: { address: string
     }
     
     fetchData();
-  }, [params.address]);
+  }, [address]);
   
   const handleRetry = () => {
     setLoading(true);
@@ -91,7 +92,7 @@ export default function DirectMarketPage({ params }: { params: { address: string
                 {collectionData?.symbol} • {collectionData?.totalSupply || 0} items
               </p>
               <p className="text-sm mb-4 font-mono break-all">
-                {params.address}
+                {address}
               </p>
               
               <div className="mt-4">
@@ -109,13 +110,13 @@ export default function DirectMarketPage({ params }: { params: { address: string
           
           <div className="flex flex-wrap gap-2">
             <Link 
-              href={`/debug-collection/${params.address}`}
+              href={`/debug-collection/${address}`}
               className="px-4 py-2 bg-theme-surface hover:bg-theme-surface/80 border border-theme-border rounded-lg"
             >
               Debug View
             </Link>
             <Link 
-              href={`/collection/${params.address}`}
+              href={`/collection/${address}`}
               className="px-4 py-2 bg-theme-surface hover:bg-theme-surface/80 border border-theme-border rounded-lg"
             >
               Standard View
@@ -139,10 +140,10 @@ export default function DirectMarketPage({ params }: { params: { address: string
               price={nft.price}
               seller={nft.listing?.seller || nft.owner}
               collection={{
-                contract: params.address,
+                contract: address,
                 name: collectionData?.name || 'Collection'
               }}
-              contractAddress={params.address}
+              contractAddress={address}
             />
           ))}
         </div>

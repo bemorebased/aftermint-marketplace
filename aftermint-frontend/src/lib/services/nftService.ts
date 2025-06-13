@@ -56,17 +56,29 @@ export const getBasedAIProvider = () => {
     // For browser environments, ALWAYS use the user's wallet provider when available
     if (typeof window !== 'undefined' && window.ethereum) {
       console.log('[nftService] ✅ Using window.ethereum BrowserProvider to avoid CORS');
-      return new ethers.BrowserProvider(window.ethereum);
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      
+      // Set up error handling for connection interruptions
+      provider.on('error', (error) => {
+        console.warn('[nftService] Provider connection error (handled):', error.message);
+      });
+      
+      return provider;
     }
     
     // Check if we're in server-side rendering environment
     if (typeof window === 'undefined') {
       console.log('[nftService] 🔄 SSR environment detected, creating JsonRpcProvider for SSR');
       // Return a provider but don't try to connect during SSR
-      return new ethers.JsonRpcProvider('https://mainnet.basedaibridge.com/rpc/', {
+      const provider = new ethers.JsonRpcProvider('https://mainnet.basedaibridge.com/rpc/', {
         name: 'BasedAI',
         chainId: 32323
       });
+      
+      // Configure timeout and retry settings for RPC provider
+      provider.pollingInterval = 30000; // 30 seconds
+      
+      return provider;
     }
     
     // If no wallet available, throw error instead of trying direct RPC
@@ -78,7 +90,12 @@ export const getBasedAIProvider = () => {
     // If window.ethereum exists but fails, try it again instead of falling back to RPC
     if (typeof window !== 'undefined' && window.ethereum) {
       console.log('[nftService] 🔄 Retrying with window.ethereum after error');
-      return new ethers.BrowserProvider(window.ethereum);
+      try {
+        return new ethers.BrowserProvider(window.ethereum);
+      } catch (retryError) {
+        console.error('[nftService] ❌ Retry failed:', retryError);
+        throw new Error('Wallet connection failed. Please refresh and try again.');
+      }
     }
     
     // Only for SSR - never for browser
@@ -108,17 +125,69 @@ export const getContractInfoViaExplorer = async (contractAddress: string) => {
   }
 };
 
-// Get total supply via Explorer API
+// Safe contract call helper that handles connection errors gracefully
+export async function safeContractCall<T>(
+  contract: ethers.Contract,
+  methodName: string,
+  args: any[] = [],
+  fallbackValue: T | null = null
+): Promise<T | null> {
+  try {
+    console.log(`[safeContractCall] Calling ${methodName} on contract ${contract.target}`);
+    const result = await contract[methodName](...args);
+    console.log(`[safeContractCall] ✅ ${methodName} result:`, result);
+    return result;
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    console.warn(`[safeContractCall] ⚠️ ${methodName} failed:`, errorMessage);
+    
+    // Check for specific error types that we can handle gracefully
+    if (errorMessage.includes('could not decode result data') ||
+        errorMessage.includes('execution reverted') ||
+        errorMessage.includes('call exception') ||
+        errorMessage.includes('Connection interrupted')) {
+      console.log(`[safeContractCall] Using fallback value for ${methodName}`);
+      return fallbackValue;
+    }
+    
+    throw error; // Re-throw if it's an unexpected error
+  }
+}
+
+// Get total supply via Explorer API with better error handling
 export const getTotalSupplyViaExplorer = async (contractAddress: string): Promise<number | null> => {
   try {
-    const response = await fetch(`${BASEDAI_EXPLORER_API}/tokens/${contractAddress}`);
+    console.log(`[getTotalSupplyViaExplorer] Fetching total supply for ${contractAddress}`);
+    const response = await fetch(`${BASEDAI_EXPLORER_API}/tokens/${contractAddress}`, {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+      },
+      // Add timeout
+      signal: AbortSignal.timeout(10000) // 10 second timeout
+    });
+    
     if (!response.ok) {
-      throw new Error(`Explorer API error: ${response.status}`);
+      throw new Error(`Explorer API error: ${response.status} ${response.statusText}`);
     }
+    
     const data = await response.json();
-    return data.total_supply ? parseInt(data.total_supply) : null;
+    console.log(`[getTotalSupplyViaExplorer] Explorer response:`, data);
+    
+    const totalSupply = data.total_supply ? parseInt(data.total_supply) : null;
+    console.log(`[getTotalSupplyViaExplorer] ✅ Total supply: ${totalSupply}`);
+    return totalSupply;
   } catch (error) {
-    console.warn('Explorer API total supply failed:', error);
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    console.warn(`[getTotalSupplyViaExplorer] ❌ Explorer API total supply failed:`, errorMessage);
+    
+    // Return known values for specific contracts
+    const contractLower = contractAddress.toLowerCase();
+    if (contractLower === '0x1639269ed4fe6ff1fc1218cc1cb485313eb50a21') {
+      console.log(`[getTotalSupplyViaExplorer] Using known LifeNodes total supply: 777`);
+      return 777;
+    }
+    
     return null;
   }
 };

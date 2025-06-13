@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import Image from 'next/image';
 import Link from 'next/link';
+import SafeImage from '@/components/SafeImage';
 import { X, ExternalLink, User, Tag, DollarSign, ShoppingCart, Zap } from 'lucide-react';
 import { useAccount, useWalletClient } from 'wagmi';
 import { buyNFT, makeOfferOnNFT } from '@/lib/services/marketplaceService';
@@ -294,12 +294,10 @@ export default function NFTInteractionModal({ nft, isOpen, onClose }: NFTInterac
 
         {/* NFT Image */}
         <div className="relative aspect-square bg-gradient-to-br from-gray-800/50 to-gray-900/50">
-          <Image
+          <SafeImage
             src={nft.image}
             alt={nft.name}
-            fill
-            className="object-cover"
-            sizes="(max-width: 768px) 100vw, 400px"
+            className="w-full h-full object-cover"
           />
           
           {/* Status badges over image */}

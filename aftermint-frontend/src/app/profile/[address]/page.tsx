@@ -14,7 +14,8 @@ import { ethers } from 'ethers';
 // Use the NFT_COLLECTIONS from the service instead of hardcoded data
 const collections = NFT_COLLECTIONS;
 
-export default function UserProfilePage({ params }: { params: { address: string } }) {
+export default async function UserProfilePage({ params }: { params: Promise<{ address: string }> }) {
+  const { address } = await params;
   const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState<'grid' | 'trader' | 'compact'>('grid');
   const [itemsPerPage, setItemsPerPage] = useState<20 | 40>(20);
@@ -27,8 +28,6 @@ export default function UserProfilePage({ params }: { params: { address: string 
   const [subscriptionActive, setSubscriptionActive] = useState(true);
   const [subscriptionDays, setSubscriptionDays] = useState(23);
   const [lifeNodesOwned, setLifeNodesOwned] = useState(true);
-  
-  const { address } = params;
   const provider = getBasedAIProvider();
   const { isConnected } = useAccount();
   

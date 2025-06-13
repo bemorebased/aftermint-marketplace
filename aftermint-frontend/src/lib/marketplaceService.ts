@@ -1,7 +1,7 @@
 import { ethers, BrowserProvider, Signer } from 'ethers';
-import { marketplaceABI } from './abi/marketplaceABI';
-import { erc721MinimalApproveABI } from './abi/erc721MinimalApproveABI';
-import { MARKETPLACE_CONTRACT_ADDRESS, NATIVE_TOKEN_ADDRESS } from './constants/contracts';
+import { marketplaceABI } from '../abi/marketplaceABI';
+import { erc721MinimalApproveABI } from '../abi/erc721MinimalApproveABI';
+import { MARKETPLACE_CONTRACT_ADDRESS, NATIVE_TOKEN_ADDRESS } from '../constants/contracts';
 import { getBasedAIProvider } from './nftService';
 import { formatEther } from 'ethers';
 
@@ -1803,29 +1803,17 @@ export const getCollectionListingsFromAPI = async (
   collectionAddress: string
 ): Promise<Array<{ tokenId: number; price: string; seller: string }>> => {
   try {
-    console.log(`[MarketplaceService] Getting collection listings from API for ${collectionAddress}`);
-    
-    const response = await fetch(`https://explorer.bf1337.org/api/contracts/tokenListing?collection=${collectionAddress}`);
+    const response = await fetch(
+      `/api/v2/tokenListing?collection=${collectionAddress}`
+    );
     if (!response.ok) {
       throw new Error(`Failed to fetch collection listings: ${response.status}`);
     }
-    
     const data = await response.json();
-    
-    if (data.listings && Array.isArray(data.listings)) {
-      return data.listings
-        .filter((listing: any) => listing.isActive !== false) // Only active listings
-        .map((listing: any) => ({
-          tokenId: listing.tokenId || listing.token_id,
-          price: listing.price || listing.amount,
-          seller: listing.seller || listing.owner
-        }));
-    }
-    
-    return [];
-    
+    return data.listings || [];
   } catch (error) {
     console.error('[MarketplaceService] Error getting collection listings from API:', error);
+    // In case of error, return an empty array to prevent downstream crashes
     return [];
   }
 };

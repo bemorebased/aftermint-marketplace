@@ -358,8 +358,12 @@ function ProfilePageContent() {
                   Connected
                 </div>
                 <div className="flex items-center gap-2 text-theme-text-secondary text-xs mt-2">
-                  <span>Joined May 2024</span>
-                  <span>•</span>
+                  {/* Settings button */}
+                  <Link href="/settings" className="flex items-center gap-1 hover:text-theme-primary">
+                    <Settings size={12} />
+                    <span>Settings</span>
+                  </Link>
+                  <span className="text-theme-text-tertiary">|</span>
                   <button 
                     onClick={() => {navigator.clipboard.writeText(address || '')}} 
                     className="hover:text-theme-primary transition-colors truncate flex items-center gap-1"

@@ -4,13 +4,10 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import Footer from "@/components/layout/Footer";
 import Header from "@/components/layout/Header";
-import dynamic from "next/dynamic";
 import { Providers } from './providers';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { ErrorTrackerInitializer } from '@/components/ErrorTrackerInitializer';
-
-// Import NetworkBanner with dynamic import (client-side only)
-const NetworkBanner = dynamic(() => import("@/components/NetworkBanner"), { ssr: false });
+import { ClientOnlyNetworkBanner } from '@/components/ClientOnlyWrapper';
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -45,7 +42,7 @@ export default function RootLayout({
               {children}
             </main>
             <Footer />
-            <NetworkBanner />
+            <ClientOnlyNetworkBanner />
             <ErrorTrackerInitializer />
           </Providers>
         </ErrorBoundary>

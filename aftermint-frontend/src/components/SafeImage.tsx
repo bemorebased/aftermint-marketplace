@@ -31,7 +31,13 @@ export default function SafeImage({
 
   // Initialize imageSrc from src prop in useEffect to avoid setState during render
   useEffect(() => {
-    setImageSrc(src);
+    let initialSrc = src;
+    // Handle ipfs:// URLs by converting to ipfs.io gateway
+    if (initialSrc.startsWith('ipfs://')) {
+      const cleaned = initialSrc.replace('ipfs://', '');
+      initialSrc = `https://ipfs.io/ipfs/${cleaned}`;
+    }
+    setImageSrc(initialSrc);
     setHasError(false);
   }, [src]);
 
@@ -39,13 +45,15 @@ export default function SafeImage({
     if (!hasError && imageSrc) {
       setHasError(true);
       // Try alternative IPFS gateways
-      if (imageSrc.includes('nursing-gray-opossum.myfilebase.com')) {
-        const cid = imageSrc.split('/ipfs/')[1];
-        if (cid) {
-          // Try ipfs.io gateway as fallback
-          setImageSrc(`https://ipfs.io/ipfs/${cid}`);
-          return;
-        }
+      if (imageSrc.startsWith('https://ipfs.io/ipfs/')) {
+        const cidPath = imageSrc.replace('https://ipfs.io/ipfs/', '');
+        setImageSrc(`https://gateway.pinata.cloud/ipfs/${cidPath}`);
+        return;
+      }
+      if (imageSrc.startsWith('https://gateway.pinata.cloud/ipfs/')) {
+        const cidPath = imageSrc.replace('https://gateway.pinata.cloud/ipfs/', '');
+        setImageSrc(`https://cloudflare-ipfs.com/ipfs/${cidPath}`);
+        return;
       }
       
       // Final fallback to placeholder

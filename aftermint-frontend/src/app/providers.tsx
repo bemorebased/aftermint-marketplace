@@ -13,41 +13,39 @@ import { ThemeProvider as NextThemesProvider } from 'next-themes';
 
 // Fix MetaMask provider conflicts on component mount
 if (typeof window !== 'undefined') {
-  // Suppress MetaMask provider conflicts completely
-  const originalError = console.error;
-  console.error = (...args: any[]) => {
-    // Filter out MetaMask provider conflict errors
-    const message = args[0]?.toString() || '';
-    if (message.includes('MetaMask encountered an error setting the global Ethereum provider') ||
-        message.includes('Cannot set property ethereum') ||
-        message.includes('which has only a getter')) {
-      // Silently ignore these specific MetaMask conflicts
-      return;
-    }
-    // Log other errors normally
-    originalError.apply(console, args);
-  };
-
-  // Handle ethereum provider setup gracefully
+  // Handle multiple ethereum providers gracefully
+  window.addEventListener('ethereum#initialized', () => {
+    console.log('[Providers] Ethereum provider initialized');
+  });
+  
+  // Prevent MetaMask conflicts by safely accessing the provider
   const handleEthereumProvider = () => {
     try {
       if (window.ethereum) {
-        // Check for multiple providers without triggering errors
-        const hasMultipleProviders = Array.isArray(window.ethereum.providers) && window.ethereum.providers.length > 0;
-        
-        if (hasMultipleProviders) {
-          console.debug('[Providers] Multiple wallet providers detected - using default');
-        } else {
-          console.debug('[Providers] Single wallet provider detected');
+        // If there are multiple providers, MetaMask usually takes precedence
+        if (window.ethereum.providers?.length) {
+          console.log('[Providers] Multiple ethereum providers detected, using primary');
+          // Find MetaMask provider specifically
+          const metamaskProvider = window.ethereum.providers.find(
+            (provider: any) => provider.isMetaMask
+          );
+          if (metamaskProvider) {
+            console.log('[Providers] MetaMask provider found');
+          }
         }
       }
     } catch (error) {
-      // Completely silent - no logging to avoid console pollution
+      // Silently handle the error to prevent console spam
+      console.debug('[Providers] Ethereum provider setup handled gracefully');
     }
   };
   
-  // Handle provider setup after DOM is ready
-  setTimeout(handleEthereumProvider, 100);
+  // Handle provider setup
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', handleEthereumProvider);
+  } else {
+    handleEthereumProvider();
+  }
 }
 
 // Define the BasedAI chain
@@ -72,49 +70,58 @@ const basedAIChain = defineChain({
   },
 });
 
-// Create wagmi config and query client only once to prevent double initialization
-let wagmiConfig: any = null;
-let queryClient: QueryClient | null = null;
+// Global singleton instances to prevent double initialization in React StrictMode
+let wagmiConfigInstance: any = null;
+let queryClientInstance: QueryClient | null = null;
 
 function getWagmiConfig() {
-  if (!wagmiConfig) {
-    const hasValidProjectId = process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID && 
-                             process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID !== 'YOUR_PROJECT_ID_HERE';
-    
-    const configOptions: any = {
-      appName: 'AfterMint',
-      chains: [basedAIChain],
-      ssr: true,
-    };
-
-    // Only add projectId if it's valid
-    if (hasValidProjectId) {
-      configOptions.projectId = process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID!;
-    } else {
-      // Add empty wallets config when no project ID
-      configOptions.wallets = [{
-        groupName: 'Popular',
+  // Only create wagmi config once, even in React StrictMode
+  if (!wagmiConfigInstance) {
+    console.log('[Providers] Creating new wagmi config instance');
+    try {
+      wagmiConfigInstance = getDefaultConfig({
+        appName: 'AfterMint',
+        projectId: process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || 'dummy-project-id',
+        chains: [basedAIChain],
+        ssr: true,
+        // Simplified wallet configuration to prevent conflicts
+        wallets: process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID ? undefined : []
+      });
+      console.log('[Providers] ✅ Wagmi config created successfully');
+    } catch (error) {
+      console.error('[Providers] Error creating wagmi config:', error);
+      // Fallback to minimal config
+      wagmiConfigInstance = getDefaultConfig({
+        appName: 'AfterMint',
+        projectId: 'fallback-project-id',
+        chains: [basedAIChain],
+        ssr: true,
         wallets: []
-      }];
+      });
     }
-
-    wagmiConfig = getDefaultConfig(configOptions);
+  } else {
+    console.log('[Providers] Reusing existing wagmi config instance');
   }
-  return wagmiConfig;
+  return wagmiConfigInstance;
 }
 
 function getQueryClient() {
-  if (!queryClient) {
-    queryClient = new QueryClient({
+  // Only create query client once, even in React StrictMode
+  if (!queryClientInstance) {
+    console.log('[Providers] Creating new query client instance');
+    queryClientInstance = new QueryClient({
       defaultOptions: {
         queries: {
           retry: 1,
           refetchOnWindowFocus: false,
+          staleTime: 5 * 60 * 1000, // 5 minutes
         },
       },
     });
+  } else {
+    console.log('[Providers] Reusing existing query client instance');
   }
-  return queryClient;
+  return queryClientInstance;
 }
 
 // Improved theme component that prevents white background flash

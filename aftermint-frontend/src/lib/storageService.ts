@@ -1,6 +1,6 @@
 import { ethers } from 'ethers';
 import { MARKETPLACE_STORAGE_ADDRESS, getBasedAIProvider } from './nftService';
-import { marketplaceABI } from './abi/marketplaceABI';
+import { marketplaceABI } from '../abi/marketplaceABI';
 
 // Import the storage ABI - we'll need to create this
 const STORAGE_ABI = [

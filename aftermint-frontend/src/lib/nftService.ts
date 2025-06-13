@@ -1,5 +1,5 @@
 import { ethers } from 'ethers';
-import MockNFTAbi from './abis/MockNFT.json';
+import MockNFTAbi from '../abis/MockNFT.json';
 
 // Add this type definition near the top of the file, before the function
 export interface NFTMetadata {

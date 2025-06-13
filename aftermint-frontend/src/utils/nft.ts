@@ -495,31 +495,40 @@ export async function fetchMultipleNFTMetadata(
 }
 
 /**
- * Calculate a rarity score for an NFT based on its traits
- * A higher score means the NFT is more rare
- * 
- * @param traits Array of trait objects with trait_type, value and rarity percentage
- * @returns Rarity score number
+ * Calculate a rarity score for an NFT. Accepts either:
+ *  • metadata object that contains an `attributes` array, or
+ *  • a raw `traits` array directly.
+ * If the data is missing / malformed the function returns 0 silently to avoid UI crashes.
+ *
+ * @param metadataOrTraits  NFT metadata object OR traits array
+ * @param _totalSupply      (optional) total supply – currently unused but reserved for future formulas
  */
-export function calculateRarityScore(traits: any[]): number {
-  if (!traits || traits.length === 0) return 0;
-  
-  // For each trait, the rarer it is, the higher its contribution to the score
-  // Formula: Sum of (1 / traitRarityPercentage) for each trait
-  let score = 0;
-  
-  traits.forEach(trait => {
-    // Get the trait rarity percentage (how many NFTs have this trait)
-    const rarityPercentage = trait.rarity || 0;
-    
-    // Avoid division by zero
-    if (rarityPercentage > 0) {
-      // The rarer the trait (lower percentage), the higher its contribution
-      score += 100 / rarityPercentage;
+export function calculateRarityScore(metadataOrTraits: any, _totalSupply?: number): number {
+  try {
+    // Normalise to a traits array
+    let traits: any[] = [];
+    if (Array.isArray(metadataOrTraits)) {
+      traits = metadataOrTraits;
+    } else if (metadataOrTraits && Array.isArray(metadataOrTraits.attributes)) {
+      traits = metadataOrTraits.attributes;
     }
-  });
-  
-  return parseFloat(score.toFixed(2));
+
+    if (!traits || traits.length === 0) return 0;
+
+    // Sum inverse rarity percentages – common simple formula
+    let score = 0;
+    for (const trait of traits) {
+      const rarityPercentage = typeof trait.rarity === 'number' ? trait.rarity : 0;
+      if (rarityPercentage > 0) {
+        score += 100 / rarityPercentage;
+      }
+    }
+
+    return parseFloat(score.toFixed(2));
+  } catch (err) {
+    // Graceful fallback – never throw from UI calc
+    return 0;
+  }
 }
 
 /**
