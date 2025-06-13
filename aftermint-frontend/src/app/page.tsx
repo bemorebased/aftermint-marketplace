@@ -566,7 +566,7 @@ export default function Home() {
       allCollections.find(c => c.name === "Gang Game Evolution"),
       allCollections.find(c => c.name === "FancyFrogFamily"),
       allCollections.find(c => c.name === "BasedBeasts")
-    ].filter(Boolean); // Remove any undefined entries
+    ].filter((collection): collection is NonNullable<typeof collection> => Boolean(collection)); // Remove any undefined entries with proper type guard
     
     console.log('[HomePage] ⚡ Using featured collections for fast loading');
     return featured;

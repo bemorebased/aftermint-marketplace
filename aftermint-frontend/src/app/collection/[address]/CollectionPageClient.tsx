@@ -23,9 +23,9 @@ interface NFTData {
   image: string;
   owner?: string;
   isListed?: boolean;
-  price?: number;
+  price?: string;
   seller?: string;
-  collection?: {
+  collection: {
     contract: string;
     name: string;
   };
@@ -76,7 +76,7 @@ export default function CollectionPageClient({ address }: CollectionPageClientPr
         // Process NFTs with listing data
         const processedNFTs = tokens.map((token: any, index: number) => {
           const tokenId = parseInt(token.id || token.tokenId || index.toString());
-          const listing = listings.find(l => parseInt(l.tokenId) === tokenId);
+          const listing = listings.find(l => parseInt(String(l.tokenId)) === tokenId);
           
           const nftData = {
             id: tokenId,
@@ -85,7 +85,7 @@ export default function CollectionPageClient({ address }: CollectionPageClientPr
             image: token.metadata?.image || token.image || token.imageUrl || `https://picsum.photos/seed/${address}${tokenId}/500/500`,
             owner: token.owner?.hash || token.owner,
             isListed: !!listing,
-            price: listing ? parseFloat(listing.price) : null,
+            price: listing ? listing.price : undefined,
             seller: listing?.seller,
             collection: {
               contract: address,
@@ -104,7 +104,11 @@ export default function CollectionPageClient({ address }: CollectionPageClientPr
         const sortedNFTs = processedNFTs.sort((a, b) => {
           if (a.isListed && !b.isListed) return -1;
           if (!a.isListed && b.isListed) return 1;
-          if (a.isListed && b.isListed) return (a.price || 0) - (b.price || 0);
+          if (a.isListed && b.isListed) {
+            const priceA = parseFloat(a.price || '0');
+            const priceB = parseFloat(b.price || '0');
+            return priceA - priceB;
+          }
           return a.tokenId - b.tokenId;
         });
 
@@ -144,7 +148,7 @@ export default function CollectionPageClient({ address }: CollectionPageClientPr
           name: basedCollection.name,
           contract: basedCollection.id,
           logo: basedCollection.logoUrl,
-          description: basedCollection.description || `Collection for ${basedCollection.name}`,
+          description: `Collection for ${basedCollection.name}`,
           totalSupply: basedCollection.items || 777, // Default to 777 for LifeNodes
           holders: basedCollection.owners || 500,
         });
@@ -173,9 +177,12 @@ export default function CollectionPageClient({ address }: CollectionPageClientPr
             
             // Update collection with real data
             setCollection(prev => ({
-              ...prev,
-              totalSupply: parseInt(tokenInfo.totalSupply || tokenInfo.supply || prev?.totalSupply || 777),
               name: tokenInfo.name || prev?.name || 'Unknown Collection',
+              contract: prev?.contract || address,
+              logo: prev?.logo,
+              description: prev?.description || 'Collection details loading...',
+              totalSupply: parseInt(tokenInfo.totalSupply || tokenInfo.supply || prev?.totalSupply?.toString() || '777'),
+              holders: prev?.holders || 500,
             }));
           }
         }
@@ -187,8 +194,12 @@ export default function CollectionPageClient({ address }: CollectionPageClientPr
           if (holdersData.status === "1" && holdersData.result) {
             console.log(`[CollectionPageClient] Holders data:`, holdersData.result.length);
             setCollection(prev => ({
-              ...prev,
-              holders: holdersData.result.length || prev?.holders || 500
+              name: prev?.name || 'Unknown Collection',
+              contract: prev?.contract || address,
+              logo: prev?.logo,
+              description: prev?.description || 'Collection details loading...',
+              totalSupply: prev?.totalSupply || 777,
+              holders: holdersData.result.length || prev?.holders || 500,
             }));
           }
         }
