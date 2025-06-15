@@ -1,0 +1,8 @@
+This file should be replaced with an actual PNG image of a coin logo.
+
+For now, you should use one of these options:
+1. Copy a suitable coin logo image to this location
+2. Update the code to use a different image that exists in your project
+3. Use an SVG logo directly in the component instead of referencing this file
+
+The file path should be: public/images/coin-logo.png 

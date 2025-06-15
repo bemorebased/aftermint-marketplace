@@ -1,0 +1,22 @@
+{
+  "name": "aftermint-marketplace",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "aftermint-frontend",
+    "hardhat_project"
+  ],
+  "scripts": {
+    "dev": "cd aftermint-frontend && npm run dev",
+    "build": "cd aftermint-frontend && npm run build",
+    "start": "cd aftermint-frontend && npm run start",
+    "lint": "cd aftermint-frontend && npm run lint",
+    "test": "cd hardhat_project && npx hardhat test"
+  },
+  "dependencies": {
+    "@rainbow-me/rainbowkit": "^2.2.5",
+    "@tanstack/react-query": "^5.76.2",
+    "ethers": "^6.14.1",
+    "wagmi": "^2.15.4"
+  }
+}

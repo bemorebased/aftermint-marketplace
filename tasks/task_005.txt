@@ -1,0 +1,11 @@
+# Task ID: 5
+# Title: Implement NFT Detail Page and Actions
+# Status: done
+# Dependencies: 4
+# Priority: high
+# Description: Develop an NFT detail page that displays comprehensive, dynamically fetched data for a selected NFT. Implement contextual actions based on ownership and listing status.
+# Details:
+Use Ethers.js to interact with the smart contracts and retrieve NFT metadata. Implement a system for displaying offer history, sales history, and other relevant data.
+
+# Test Strategy:
+

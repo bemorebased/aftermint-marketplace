@@ -1,0 +1,478 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "MockNFT",
+  "sourceName": "contracts/MockNFT.sol",
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "string",
+          "name": "baseTokenURI",
+          "type": "string"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "sender",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "address",
+          "name": "owner",
+          "type": "address"
+        }
+      ],
+      "name": "ERC721IncorrectOwner",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "operator",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "ERC721InsufficientApproval",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "approver",
+          "type": "address"
+        }
+      ],
+      "name": "ERC721InvalidApprover",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "operator",
+          "type": "address"
+        }
+      ],
+      "name": "ERC721InvalidOperator",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "owner",
+          "type": "address"
+        }
+      ],
+      "name": "ERC721InvalidOwner",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "receiver",
+          "type": "address"
+        }
+      ],
+      "name": "ERC721InvalidReceiver",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "sender",
+          "type": "address"
+        }
+      ],
+      "name": "ERC721InvalidSender",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "ERC721NonexistentToken",
+      "type": "error"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "owner",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "approved",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "Approval",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "owner",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "operator",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "bool",
+          "name": "approved",
+          "type": "bool"
+        }
+      ],
+      "name": "ApprovalForAll",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "from",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "to",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "Transfer",
+      "type": "event"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "to",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "approve",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "owner",
+          "type": "address"
+        }
+      ],
+      "name": "balanceOf",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "baseTokenURI",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "getApproved",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "owner",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "operator",
+          "type": "address"
+        }
+      ],
+      "name": "isApprovedForAll",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "name",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "ownerOf",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "to",
+          "type": "address"
+        }
+      ],
+      "name": "safeMint",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "from",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "to",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "safeTransferFrom",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "from",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "to",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bytes",
+          "name": "data",
+          "type": "bytes"
+        }
+      ],
+      "name": "safeTransferFrom",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "operator",
+          "type": "address"
+        },
+        {
+          "internalType": "bool",
+          "name": "approved",
+          "type": "bool"
+        }
+      ],
+      "name": "setApprovalForAll",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes4",
+          "name": "interfaceId",
+          "type": "bytes4"
+        }
+      ],
+      "name": "supportsInterface",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "symbol",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "tokenURI",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "from",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "to",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "transferFrom",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "bytecode": "0x608060405234801561001057600080fd5b5060405161064d38038061064d833981810160405281019061003291906104a9565b8060008190555050610489565b600080fd5b600081519050610058816105e8565b92915050565b60006020828403121561007457600080fd5b813567ffffffffffffffff81111561009057600080fd5b60a08301925061006b565b91506001600160a01b0382166100b357600080fd5b81019250610087565b509291509116905090815260208101831515019050908152602081019250610077565b60006100e367ffffffffffffffff821690506100ef610604565b91506100fb61060a565b9050919050565b6101168161054f565b82525050565b600060408201905061013060008301856105c4565b935061013e60208301846105d3565b925082820190508181111561015857610157610593565b565b6080820190508082111561017157610170610593565b50905090565b600060608201905061018c60008301876105c4565b945061019a60208301866105d3565b93508282019050818111156101b4576101b3610593565b565b60c082019050808211156101cd576101cc610593565b50905090565b600067ffffffffffffffff821690506101f2610604565b90506101fe61060a565b905090565b61021282610570565b810181811067ffffffffffffffff821117156102355761023461059e565b565b604051901515815260200190565b600060808201905061025860008301866105c4565b935061026660208301856105d3565b92508282019050818111156102805761027f610593565b565b6000602060408401905061029b60008301876105c4565b94506102a960208301866105d3565b93508282019050818111156102c3576102c2610593565b565b600060406060840190506102de60008301886105c4565b95506102ec60208301876105d3565b945082820190508181111561030657610305610593565b565b6000606060808401905061032160008301896105c4565b965061032f60208301886105d3565b955082820190508181111561034957610348610593565b565b600081519050919050565b600082825260208201905092915050565b60005b8381101561038b578081015181810152602001600001600001818301015282518152929150808201929182019101610370565b8183106103a157808101518181015260200160000160000181830101528251815292915080820192918201910161038e565b505050905090810190601f1680156103c85780820380516001600160a01b0383168182529054915091905061039f565b5050565b600081519050919050565b60008082019050919050565b6103f78161054f565b811461040257600080fd5b50565b600081359050610414816105b8565b92915050565b60006020828403121561043057600080fd5b5035919050565b6000806040838503121561044d57600080fd5b823567ffffffffffffffff81111561046957600080fd5b60a084019350610444565b92506001600160a01b03831661049057600080fd5b82019150610460565b5092915091169050908252602082018052604082019050908152602081019250610440565b60006104ba67ffffffffffffffff821690506104c6610604565b91506104d261060a565b9050919050565b6104e581610570565b82525050565b60006020820190506104ff600083018461057c565b92915050565b60008060006060848603121561052257600080fd5b833567ffffffffffffffff81111561053e57600080fd5b60a085019450610519565b93506001600160a01b03841661056757600080fd5b83019250610535565b50939250925050565b6000806000806080858703121561052257600080fd5b843567ffffffffffffffff81111561053e57600080fd5b60a086019550610519565b94506001600160a01b03851661056757600080fd5b84019350610535565b50949350935050565b6000819050919050565b600060a0820190506105b060008301856105c4565b92915050565b600060c0820190506105cb60008301856105c4565b92915050565b600080fd5b6000819050919050565b6105f38161054f565b81146105fe57600080fd5b50565b6000819050919050565b6000806000600060e0838503121561052257600080fd5b505050565b600080600060006000838503121561052257600080fd5b505050565b602f8061061c6000396000f3fe6080604052348015600f57600080fd5b506004361060285760003560e01c806306fdde0314602d578063095ea7b314605a575b600080fd5b60586004803560248101906020013560c8565b005b60586004803560248101906020013567ffffffffffffffff1660e6565b5b505050565b73ffffffffffffffffffffffffffffffffffffffff811660009081526002602052604081205460ff1690565b7f70a08231000000000000000000000000000000000000000000000000000000008152506000908051906020019061011692919061011a565b50565b8281030281811067ffffffffffffffff8211171560c257600080fd5b5090039056fea26469706673582212208fd3407705db907e1e8a27656d3941a5d8f9660e73299b6e64610e8e9c9ef12964736f6c63430008160033"
+} 

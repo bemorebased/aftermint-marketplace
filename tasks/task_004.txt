@@ -1,0 +1,11 @@
+# Task ID: 4
+# Title: Develop NFT Display and Listing Features
+# Status: pending
+# Dependencies: 3
+# Priority: high
+# Description: Implement features for displaying all NFTs owned by the user, including image, name, and collection name. Develop a system for listing NFTs on the marketplace.
+# Details:
+Use the BasedAI explorer APIs to fetch NFT data dynamically. Implement a system for displaying NFT listings with links to individual detail pages.
+
+# Test Strategy:
+

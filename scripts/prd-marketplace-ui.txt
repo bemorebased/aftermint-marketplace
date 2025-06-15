@@ -1,0 +1,79 @@
+Product Requirements Document: AfterMint NFT Marketplace UI Enhancement
+
+Goal:
+Enhance the existing AfterMint NFT Marketplace UI to fully integrate with the deployed AfterMintMarketplace.sol and AfterMintStorage.sol smart contracts on the BasedAI blockchain. The UI should dynamically fetch and display all data from the blockchain and provide a seamless user experience for all core marketplace functionalities. The existing modern, futuristic, and minimalistic design style should be maintained.
+
+Core User Stories & Features:
+
+1.  User Profile & Wallet Management:
+    *   Users can connect their Web3 wallet (e.g., MetaMask).
+    *   Wallet connection persists across page refreshes.
+    *   Users can view their native token (BASED) balance.
+    *   Users can view all NFTs they own, fetched dynamically from the BasedAI blockchain via explorer APIs.
+        *   Displayed NFT information includes image, name, and collection name.
+        *   Links to individual NFT detail pages are correct.
+    *   Profile page includes tabs for:
+        *   Collected NFTs.
+        *   Activity (listings, sales, offers made/received).
+        *   Offers (active offers made and received).
+        *   Listings (user's active NFT listings).
+        *   (Subscription features are currently out of scope for UI implementation).
+
+2.  NFT Detail Page:
+    *   Displays comprehensive, dynamically fetched data for a selected NFT:
+        *   Full metadata: Name, description, image, attributes/traits (from tokenURI via explorer or contract).
+        *   Current owner.
+        *   Listing status: Whether it's listed on AfterMintMarketplace, current price, expiration (if any), and if it's a private listing.
+        *   Offer history: Highest active offer, list of other active offers (from AfterMintStorage).
+        *   Sales history: Last sale price and potentially a brief history (from AfterMintStorage or explorer).
+    *   Provides contextual actions based on ownership and listing status.
+
+3.  Marketplace Interactions (Leveraging AfterMintMarketplace.sol & AfterMintStorage.sol):
+    *   List NFT for Sale:
+        *   Owners can list their NFTs.
+        *   Option for setting price (in BASED).
+        *   Option for setting an expiration date.
+        *   Option for creating a private listing for a specific buyer.
+        *   Handles ERC721 approval to the marketplace contract.
+    *   Buy Listed NFT:
+        *   Users can buy publicly listed NFTs.
+        *   Handles native token (BASED) payment.
+    *   Update Listing Price:
+        *   Owners can change the price of their active listings.
+    *   Cancel Listing:
+        *   Owners can remove their active listings.
+    *   Make an Offer:
+        *   Users can make offers (in BASED) on any NFT (listed or not listed).
+        *   Option for setting an offer expiration date.
+        *   Handles ERC20/native token escrow for the offer amount.
+    *   Accept an Offer:
+        *   NFT owners can accept active offers made on their NFTs.
+        *   Handles ERC721 approval and transfer.
+    *   Cancel an Offer:
+        *   Users who made offers can cancel their active offers (if not yet accepted and before expiration), reclaiming escrowed funds.
+    *   Transfer NFT:
+        *   Owners can directly transfer their NFTs to another wallet address (standard ERC721 transfer).
+
+4.  Collection Browsing:
+    *   Collections Page:
+        *   Lists available NFT collections discovered on the BasedAI network (via explorer API or a curated list).
+        *   Displays basic collection info (logo, name, possibly floor price/item count).
+    *   Single Collection Page:
+        *   Displays details for a specific collection.
+        *   Lists all NFTs within that collection, with links to their detail pages.
+        *   Shows basic info for each NFT (thumbnail, name, listing status/price on AfterMint).
+
+Technical Requirements & Considerations:
+*   All blockchain data must be fetched live. No hardcoding of NFT details beyond initial collection identification (e.g., contract address to friendly name/logo mapping).
+*   Robust error handling for API calls and blockchain transactions.
+*   Clear loading states for all asynchronous operations.
+*   Use Ethers.js for all smart contract interactions.
+*   Leverage BasedAI explorer APIs (documented in docs/api/basedai-explorer/) for fetching indexed data where appropriate.
+*   Smart Contract ABIs: AfterMintMarketplace.sol and AfterMintStorage.sol ABIs are available.
+*   Payment Token: Assume BASED (native token) for all sales and offers unless specified otherwise.
+
+Out of Scope for this Phase (Initially):
+*   Marketplace subscription features UI.
+*   Advanced charting or analytics.
+*   Real-time event listening for UI updates (polling/re-fetching on action is acceptable for now).
+*   Deployment of new smart contracts. 

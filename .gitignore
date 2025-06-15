@@ -1,0 +1,66 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+dev-debug.log
+
+# Dependency directories
+node_modules/
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Next.js build output
+.next/
+out/
+
+# Build outputs
+dist/
+build/
+
+# Cache directories
+.cache/
+.parcel-cache/
+
+# Editor directories and files
+.idea
+.vscode
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# OS specific
+.DS_Store
+Thumbs.db
+
+# Hardhat files
+hardhat_project/cache/
+hardhat_project/artifacts/
+hardhat_project/typechain-types/
+
+# Task Master files (keep structure but ignore generated files)
+.taskmaster/
+tasks.json.bak
+
+# Backup files
+backups/
+*.backup
+*.bak
+
+# Development files
+dev.log
+tsconfig.tsbuildinfo
+
+# Private keys and sensitive data
+*.pem
+*.key
+wallet.json
+private-keys.txt 

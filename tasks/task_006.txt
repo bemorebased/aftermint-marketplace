@@ -1,0 +1,80 @@
+# Task ID: 6
+# Title: Develop Marketplace Interactions (Listing, Buying, Updating, Canceling)
+# Status: pending
+# Dependencies: 5
+# Priority: high
+# Description: Implement features for listing NFTs for sale, buying listed NFTs, updating listing prices, canceling listings, making offers, accepting offers, and canceling offers.
+# Details:
+Use Ethers.js to interact with the smart contracts and implement a system for handling ERC721 approval, transfer, and escrow. Implement robust error handling for API calls and blockchain transactions.
+
+# Test Strategy:
+
+
+# Subtasks:
+## 1. Implement NFT Listing Feature [in-progress]
+### Dependencies: None
+### Description: Create a function to list an NFT on the marketplace with required metadata.
+### Details:
+This feature will involve interacting with the smart contract to create a new listing.
+<info added on 2025-05-22T09:22:08.451Z>
+This feature will involve interacting with the smart contract to create a new listing, specifically for buying listed NFTs.
+
+1.  **UI Components:**
+    *   Add "Buy" button on NFT detail page (`aftermint-frontend/src/app/nft/[collection]/[tokenId]/page.tsx`) for listed NFTs.
+    *   Consider adding a "Buy" button on `NftCard.tsx` in the profile.
+    *   Create a new modal/form component for buying inputs:
+        *   Price (in BASED, string input).
+        *   Expiration date (optional, use a date picker).
+        *   Private buyer address (optional, string input, validate address format).
+
+2.  **Smart Contract Interaction Logic (new `marketplaceService.ts`):**
+    *   Define a function `buyNFTOnMarketplace(nftContractAddress: string, tokenId: string, priceInBased: string, expirationDate?: Date, privateBuyerAddress?: string, signer: ethers.Signer): Promise<void>`.
+    *   Inside this function:
+        *   **ERC721 Approval:**
+            *   Get NFT contract instance (`new ethers.Contract(nftContractAddress, ERC721_ABI, signer)`).
+            *   Call `nftContract.approve(MARKETPLACE_CONTRACT_ADDRESS, tokenId)`.
+            *   Wait for transaction confirmation.
+        *   **Marketplace Buying:**
+            *   Get Marketplace contract instance (`new ethers.Contract(MARKETPLACE_CONTRACT_ADDRESS, MARKETPLACE_ABI, signer)`).
+            *   Convert `priceInBased` to wei (`ethers.utils.parseUnits(priceInBased, 'ether')`).
+            *   Convert `expirationDate` to Unix timestamp. If undefined, use 0.
+            *   Set `privateBuyerAddress` to `ethers.constants.AddressZero` if undefined or empty.
+            *   Call `marketplaceContract.buyNFT(nftContractAddress, tokenId, priceInWei, expirationTimestamp, privateBuyer)`.
+            *   Wait for transaction confirmation.
+
+3.  **State Management & UI Updates:**
+    *   On successful buying, update the UI to show the NFT as bought (e.g., on the detail page and profile page).
+    *   Refetch NFT data or update local state.
+
+4.  **Error Handling & Notifications:**
+    *   Implement user feedback for transaction submission, confirmation (success), and errors (e.g., user rejection, gas issues, contract reverts). Use toasts or similar.
+
+5.  **ABI and Address Placeholders:**
+    *   Define constants for `MARKETPLACE_CONTRACT_ADDRESS`.
+    *   Store ABIs (Marketplace and a minimal ERC721) likely in `lib/abi/`.
+</info added on 2025-05-22T09:22:08.451Z>
+
+## 2. Buy Listed NFTs [pending]
+### Dependencies: 6.1
+### Description: Create a function to purchase an NFT from the marketplace using the user's wallet.
+### Details:
+This feature will involve interacting with the smart contract to transfer ownership of the NFT.
+
+## 3. Update Listing Prices [pending]
+### Dependencies: 6.1
+### Description: Create a function to update the price of an existing listing.
+### Details:
+This feature will involve interacting with the smart contract to update the listing's metadata.
+
+## 4. Implement Listing Cancellation [pending]
+### Dependencies: 6.1
+### Description: Create a function to cancel an existing listing.
+### Details:
+This feature will involve interacting with the smart contract to remove the listing from the marketplace.
+
+## 5. Implement Offer Handling [pending]
+### Dependencies: 6.1
+### Description: Create a function to handle offers on listed NFTs, including creating and accepting offers.
+### Details:
+This feature will involve interacting with the smart contract to manage offers on listings.
+

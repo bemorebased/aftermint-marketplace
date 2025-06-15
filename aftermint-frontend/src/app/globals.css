@@ -1,0 +1,597 @@
+/* Cache busting update - timestamp: 2023-11-21 */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Font imports */
+@font-face {
+  font-family: 'Orbitron';
+  src: url('/fonts/Orbitron-Regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Orbitron';
+  src: url('/fonts/Orbitron-Medium.ttf') format('truetype');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Orbitron';
+  src: url('/fonts/Orbitron-Bold.ttf') format('truetype');
+  font-weight: bold;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Spartan MB';
+  src: url('/fonts/SpartanMB-Regular.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Spartan MB';
+  src: url('/fonts/SpartanMB-Bold.otf') format('opentype');
+  font-weight: bold;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Spartan MB';
+  src: url('/fonts/SpartanMB-Light.otf') format('opentype');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Bedstead';
+  src: url('/fonts/Bedstead-Regular.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Bedstead';
+  src: url('/fonts/Bedstead-Bold.otf') format('opentype');
+  font-weight: bold;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  /* Default theme (dark) */
+  --theme-background: 0 0% 6%;
+  --theme-surface: 0 0% 10%;
+  --theme-surface-secondary: 0 0% 8%;
+  --theme-card-highlight: 180 100% 94%;
+  --theme-border: 0 0% 16%;
+  --theme-text-primary: 189 47% 80%;
+  --theme-text-secondary: 197 71% 73%;
+  --theme-primary: 175 100% 38%;
+  --theme-secondary: 284 61% 58%;
+  --theme-hover: 0 0% 12%;
+  --theme-font-family: 'Bedstead', monospace;
+  --theme-primary-rgb: 0, 255, 191;
+  --theme-secondary-rgb: 100, 71, 254;
+  --theme-surface-rgb: 26, 26, 26;
+}
+
+/* Theme Classes */
+.theme-dark {
+  --theme-background: 0 0% 6%;
+  --theme-surface: 0 0% 10%;
+  --theme-surface-secondary: 0 0% 8%;
+  --theme-card-highlight: 180 100% 94%;
+  --theme-border: 0 0% 16%;
+  --theme-text-primary: 189 47% 80%;
+  --theme-text-secondary: 197 71% 73%;
+  --theme-primary: 175 100% 38%;
+  --theme-secondary: 284 61% 58%;
+  --theme-hover: 0 0% 12%;
+  --theme-font-family: 'Bedstead', monospace;
+  --theme-primary-rgb: 0, 255, 191;
+  --theme-secondary-rgb: 100, 71, 254;
+  --theme-surface-rgb: 26, 26, 26;
+}
+
+.theme-kek {
+  --theme-background: 130 33% 4%;
+  --theme-surface: 145 27% 5%;
+  --theme-surface-secondary: 130 30% 6%;
+  --theme-card-highlight: 120 100% 94%;
+  --theme-border: 188 16% 13%;
+  --theme-text-primary: 120 93% 79%;
+  --theme-text-secondary: 175 39% 62%;
+  --theme-primary: 120 100% 50%;
+  --theme-secondary: 111 100% 54%;
+  --theme-hover: 140 25% 8%;
+  --theme-font-family: 'Orbitron', sans-serif;
+  --theme-primary-rgb: 0, 255, 0;
+  --theme-secondary-rgb: 87, 255, 23;
+  --theme-surface-rgb: 12, 33, 16;
+}
+
+.theme-based {
+  --theme-background: 180 20% 10%;
+  --theme-surface: 188 16% 13%;
+  --theme-surface-secondary: 180 18% 11%;
+  --theme-card-highlight: 180 100% 94%;
+  --theme-border: 180 25% 25%;
+  --theme-text-primary: 180 65% 81%;
+  --theme-text-secondary: 160 100% 75%;
+  --theme-primary: 180 100% 50%;
+  --theme-secondary: 177 70% 41%;
+  --theme-hover: 185 20% 15%;
+  --theme-font-family: 'Spartan MB', sans-serif;
+  --theme-primary-rgb: 0, 255, 255;
+  --theme-secondary-rgb: 41, 219, 182;
+  --theme-surface-rgb: 21, 42, 44;
+}
+
+/* Apply theme variables */
+@layer base {
+  html, body {
+    background-color: hsl(var(--theme-background)) !important;
+    color: hsl(var(--theme-text-primary)) !important;
+    font-family: var(--theme-font-family) !important;
+    margin: 0;
+    padding: 0;
+  }
+
+  /* Ensure all text elements use theme colors */
+  h1, h2, h3, h4, h5, h6, p, span, div, label, a {
+    color: hsl(var(--theme-text-primary)) !important;
+  }
+
+  /* Ensure all elements inherit theme colors */
+  * {
+    color: inherit;
+  }
+  
+  /* Override for specific semantic classes */
+  .text-black {
+    color: #000000 !important;
+  }
+  
+  .text-white {
+    color: #ffffff !important;
+  }
+  
+  /* Theme text classes - FIXED */
+  .text-theme-text-primary {
+    color: hsl(var(--theme-text-primary)) !important;
+  }
+
+  .text-theme-primary {
+    color: hsl(var(--theme-text-primary)) !important;
+  }
+
+  .text-theme-text-secondary {
+    color: hsl(var(--theme-text-secondary)) !important;
+  }
+
+  .text-theme-secondary {
+    color: hsl(var(--theme-text-secondary)) !important;
+  }
+
+  /* Override all Tailwind gray text utilities to use theme colors */
+  .text-gray-100, .text-gray-200, .text-gray-300, .text-gray-400, .text-gray-500, .text-gray-600 {
+    color: hsl(var(--theme-text-secondary)) !important;
+  }
+  
+  .text-gray-700, .text-gray-800, .text-gray-900 {
+    color: hsl(var(--theme-text-primary)) !important;
+  }
+
+  /* Override all Tailwind slate text utilities */
+  .text-slate-100, .text-slate-200, .text-slate-300, .text-slate-400, .text-slate-500, .text-slate-600 {
+    color: hsl(var(--theme-text-secondary)) !important;
+  }
+  
+  .text-slate-700, .text-slate-800, .text-slate-900 {
+    color: hsl(var(--theme-text-primary)) !important;
+  }
+
+  /* Override all Tailwind neutral text utilities */
+  .text-neutral-100, .text-neutral-200, .text-neutral-300, .text-neutral-400, .text-neutral-500, .text-neutral-600 {
+    color: hsl(var(--theme-text-secondary)) !important;
+  }
+  
+  .text-neutral-700, .text-neutral-800, .text-neutral-900 {
+    color: hsl(var(--theme-text-primary)) !important;
+  }
+
+  .bg-theme-background {
+    background-color: hsl(var(--theme-background)) !important;
+  }
+
+  .bg-theme-surface {
+    background-color: hsl(var(--theme-surface)) !important;
+  }
+
+  .bg-theme-surface-secondary {
+    background-color: hsl(var(--theme-surface-secondary)) !important;
+  }
+
+  .bg-theme-hover {
+    background-color: hsl(var(--theme-hover)) !important;
+  }
+
+  .border-theme-border {
+    border-color: hsl(var(--theme-border)) !important;
+  }
+
+  /* Font application based on theme */
+  .theme-dark,
+  .theme-dark *,
+  body.theme-dark,
+  body.theme-dark * {
+    font-family: 'Bedstead', monospace !important;
+  }
+  
+  .theme-kek,
+  .theme-kek *,
+  body.theme-kek,
+  body.theme-kek * {
+    font-family: 'Orbitron', sans-serif !important;
+  }
+  
+  .theme-based,
+  .theme-based *,
+  body.theme-based,
+  body.theme-based * {
+    font-family: 'Spartan MB', sans-serif !important;
+  }
+}
+
+/* Utility classes */
+@layer components {
+  .glass-card {
+    @apply bg-theme-surface backdrop-blur-lg bg-opacity-60;
+    border: 2px solid hsl(var(--theme-border));
+  }
+  
+  /* NFT and Button styles */
+  .nft-image-container {
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border: 2px solid hsl(var(--theme-border));
+  }
+  
+  .nft-image-container:hover {
+    transform: scale(1.01);
+    box-shadow: 0 0 20px 5px rgba(var(--theme-primary-rgb), 0.2);
+    border-color: hsl(var(--theme-primary));
+  }
+  
+  .nft-image-container::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(to bottom right, hsl(var(--theme-primary)), hsl(var(--theme-secondary)));
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+    mix-blend-mode: overlay;
+  }
+  
+  .nft-image-container:hover::after {
+    opacity: 0.15;
+  }
+  
+  /* Enhanced buttons */
+  .btn-futuristic {
+    @apply inline-flex items-center justify-center px-4 py-2 rounded-md font-medium 
+    transition-all duration-300 ease-in-out;
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(to right, hsl(var(--theme-primary)), hsl(var(--theme-secondary)));
+    color: rgba(255, 255, 255, 0.95);
+    border: 1px solid transparent;
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.3);
+    box-shadow: 
+      0 1px 3px rgba(0, 0, 0, 0.2), 
+      0 0 0 1px rgba(255, 255, 255, 0.08) inset,
+      0 0 5px hsl(var(--theme-primary));
+  }
+  
+  .btn-futuristic:hover {
+    @apply transform scale-[1.02];
+    box-shadow: 
+      0 2px 5px rgba(0, 0, 0, 0.3), 
+      0 0 0 1px rgba(255, 255, 255, 0.15) inset,
+      0 0 10px hsl(var(--theme-primary));
+  }
+  
+  .btn-futuristic:active {
+    @apply transform scale-[0.98];
+    opacity: 0.9;
+  }
+  
+  .btn-futuristic::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+      90deg, 
+      rgba(255, 255, 255, 0) 0%, 
+      rgba(255, 255, 255, 0.2) 50%, 
+      rgba(255, 255, 255, 0) 100%
+    );
+    transition: left 0.7s ease;
+  }
+  
+  .btn-futuristic:hover::before {
+    left: 100%;
+  }
+  
+  .btn-futuristic-secondary {
+    @apply inline-flex items-center justify-center px-4 py-2 rounded-md font-medium 
+    transition-all duration-300 ease-in-out;
+    background: rgba(var(--theme-surface-rgb), 0.8);
+    color: hsl(var(--theme-text-primary));
+    border: 1px solid hsl(var(--theme-primary));
+    box-shadow: 
+      0 1px 3px rgba(0, 0, 0, 0.2), 
+      0 0 0 1px rgba(255, 255, 255, 0.05) inset,
+      0 0 5px rgba(var(--theme-primary-rgb), 0.3);
+  }
+  
+  .btn-futuristic-secondary:hover {
+    background: rgba(var(--theme-surface-rgb), 0.9);
+    border-color: hsl(var(--theme-secondary));
+    box-shadow: 
+      0 2px 5px rgba(0, 0, 0, 0.3), 
+      0 0 0 1px rgba(255, 255, 255, 0.1) inset,
+      0 0 8px rgba(var(--theme-primary-rgb), 0.4);
+  }
+  
+  .btn-futuristic-danger {
+    @apply inline-flex items-center justify-center px-4 py-2 rounded-md font-medium 
+    transition-all duration-300 ease-in-out;
+    background: rgba(239, 68, 68, 0.1);
+    color: rgba(239, 68, 68, 0.9);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    box-shadow: 
+      0 1px 3px rgba(0, 0, 0, 0.2), 
+      0 0 0 1px rgba(255, 255, 255, 0.05) inset,
+      0 0 5px rgba(239, 68, 68, 0.2);
+  }
+  
+  .btn-futuristic-danger:hover {
+    background: rgba(239, 68, 68, 0.15);
+    color: rgba(239, 68, 68, 1);
+    border-color: rgba(239, 68, 68, 0.5);
+    box-shadow: 
+      0 2px 5px rgba(0, 0, 0, 0.3), 
+      0 0 0 1px rgba(255, 255, 255, 0.1) inset,
+      0 0 8px rgba(239, 68, 68, 0.3);
+  }
+  
+  /* Animated gradient for the hero section */
+  .animate-gradient {
+    background-size: 200% auto;
+    animation: gradient-animation 5s ease infinite alternate;
+  }
+  
+  @keyframes gradient-animation {
+    0% {
+      background-position: 0% 50%;
+    }
+    100% {
+      background-position: 100% 50%;
+    }
+  }
+  
+  /* Price slider for floor sweeping */
+  .floor-sweep-slider::-webkit-slider-thumb {
+    @apply bg-theme-primary rounded-full h-5 w-5 cursor-pointer appearance-none;
+  }
+  
+  .floor-sweep-slider::-moz-range-thumb {
+    @apply bg-theme-primary rounded-full h-5 w-5 cursor-pointer;
+  }
+  
+  .floor-sweep-slider::-webkit-slider-runnable-track {
+    @apply bg-theme-card-highlight rounded-full h-2;
+  }
+  
+  .floor-sweep-slider::-moz-range-track {
+    @apply bg-theme-card-highlight rounded-full h-2;
+  }
+  
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    @apply w-2;
+  }
+  
+  ::-webkit-scrollbar-track {
+    @apply bg-theme-background;
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    @apply bg-theme-border hover:bg-theme-card-highlight rounded-full;
+  }
+}
+
+@layer utilities {
+  @keyframes shimmer-around {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+  .animate-shimmer-around {
+    background-size: 200% 200%; /* Make the gradient larger than the element */
+    animation: shimmer-around 3s linear infinite;
+  }
+
+  @keyframes futuristic-glow {
+    0%, 100% {
+      box-shadow: 0 0 2px hsl(var(--theme-primary)),
+                  0 0 4px hsl(var(--theme-primary)),
+                  0 0 6px hsl(var(--theme-secondary));
+    }
+    50% {
+      box-shadow: 0 0 4px hsl(var(--theme-secondary)),
+                  0 0 8px hsl(var(--theme-secondary)),
+                  0 0 12px hsl(var(--theme-primary));
+    }
+  }
+
+  .animate-futuristic-glow {
+    animation: futuristic-glow 2.5s ease-in-out infinite alternate;
+  }
+  
+  /* New classes for animated gradient border */
+  .animated-gradient-border-wrapper {
+    @apply relative p-0.5 overflow-hidden rounded-lg; /* Adjust padding if card has its own that creates a gap */
+  }
+  
+  .animated-gradient-border-content {
+    @apply bg-theme-surface rounded-[calc(0.5rem-2px)]; /* Match parent rounded-lg, subtract border width */
+    /* Ensure this background covers the ::before pseudo-element */
+  }
+  
+  .animated-gradient-border-wrapper::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: conic-gradient(hsl(var(--theme-primary)), hsl(var(--theme-secondary)), hsl(var(--theme-primary)));
+    animation: spin 4s linear infinite;
+    z-index: -1; /* Place behind the content div */
+    border-radius: inherit; /* Inherit border-radius from wrapper */
+    opacity: 0; /* Hidden by default, shown on hover */
+    transition: opacity 0.3s ease-in-out;
+  }
+  
+  .animated-gradient-border-wrapper:hover::before {
+    opacity: 1;
+  }
+
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .animate-fadeIn {
+    animation: fadeIn 0.3s ease-out;
+  }
+  /* End animated gradient border */
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  .scrollbar-hide {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+  }
+  
+  .animate-gradient {
+    background-size: 200% auto;
+    animation: gradient-animation 5s ease infinite alternate;
+  }
+  
+  @keyframes gradient-animation {
+    0% {
+      background-position: 0% 50%;
+    }
+    100% {
+      background-position: 100% 50%;
+    }
+  }
+}
+
+/* RainbowKit Styling Overrides */
+[data-rk] {
+  --rk-colors-accentColor: hsl(var(--theme-primary)) !important;
+  --rk-colors-accentColorForeground: hsl(var(--theme-text-primary)) !important;
+  --rk-colors-actionButtonBorder: hsl(var(--theme-border)) !important;
+  --rk-colors-actionButtonBorderMobile: hsl(var(--theme-border)) !important;
+  --rk-colors-actionButtonSecondaryBackground: hsl(var(--theme-surface)) !important;
+  --rk-colors-closeButton: hsl(var(--theme-text-secondary)) !important;
+  --rk-colors-closeButtonBackground: hsl(var(--theme-surface)) !important;
+  --rk-colors-connectButtonBackground: hsl(var(--theme-surface)) !important;
+  --rk-colors-connectButtonBackgroundError: #ef4444 !important;
+  --rk-colors-connectButtonInnerBackground: hsl(var(--theme-background)) !important;
+  --rk-colors-connectButtonText: hsl(var(--theme-text-primary)) !important;
+  --rk-colors-connectButtonTextError: #ffffff !important;
+  --rk-colors-connectionIndicator: hsl(var(--theme-primary)) !important;
+  --rk-colors-downloadBottomCardBackground: hsl(var(--theme-surface)) !important;
+  --rk-colors-downloadTopCardBackground: hsl(var(--theme-background)) !important;
+  --rk-colors-error: #ef4444 !important;
+  --rk-colors-generalBorder: hsl(var(--theme-border)) !important;
+  --rk-colors-generalBorderDim: hsl(var(--theme-border)) !important;
+  --rk-colors-menuItemBackground: hsl(var(--theme-surface)) !important;
+  --rk-colors-modalBackdrop: rgba(0, 0, 0, 0.8) !important;
+  --rk-colors-modalBackground: hsl(var(--theme-surface)) !important;
+  --rk-colors-modalBorder: hsl(var(--theme-border)) !important;
+  --rk-colors-modalText: hsl(var(--theme-text-primary)) !important;
+  --rk-colors-modalTextDim: hsl(var(--theme-text-secondary)) !important;
+  --rk-colors-modalTextSecondary: hsl(var(--theme-text-secondary)) !important;
+  --rk-colors-profileAction: hsl(var(--theme-surface)) !important;
+  --rk-colors-profileActionHover: hsl(var(--theme-border)) !important;
+  --rk-colors-profileForeground: hsl(var(--theme-surface)) !important;
+  --rk-colors-selectedOptionBorder: hsl(var(--theme-primary)) !important;
+  --rk-colors-standby: hsl(var(--theme-text-secondary)) !important;
+}
+
+/* Additional RainbowKit overrides for buttons */
+[data-rk] button {
+  background-color: hsl(var(--theme-surface)) !important;
+  color: hsl(var(--theme-text-primary)) !important;
+  border: 2px solid hsl(var(--theme-border)) !important;
+}
+
+[data-rk] button:hover {
+  background-color: hsl(var(--theme-border)) !important;
+}
+
+/* Futuristic input fields */
+.futuristic-input {
+  @apply bg-theme-surface border-2 border-theme-border rounded-lg;
+  @apply text-theme-text-primary placeholder-theme-text-secondary;
+  @apply focus:outline-none focus:border-theme-primary transition-all duration-300;
+  box-shadow: 
+    0 1px 3px rgba(0, 0, 0, 0.2), 
+    0 0 0 1px rgba(255, 255, 255, 0.05) inset;
+}
+
+.futuristic-input:focus {
+  box-shadow: 
+    0 2px 8px rgba(var(--theme-primary-rgb), 0.3),
+    0 0 0 1px rgba(255, 255, 255, 0.1) inset,
+    0 0 10px rgba(var(--theme-primary-rgb), 0.2),
+    0 0 0 2px rgba(var(--theme-primary-rgb), 0.3);
+}

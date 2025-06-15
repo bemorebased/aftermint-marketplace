@@ -1,0 +1,11 @@
+# Task ID: 7
+# Title: Implement Collection Browsing Features
+# Status: pending
+# Dependencies: 6
+# Priority: medium
+# Description: Develop features for browsing NFT collections, including a collections page and single collection pages.
+# Details:
+Use the BasedAI explorer APIs to fetch collection data dynamically. Implement a system for displaying basic collection info and listing all NFTs within that collection.
+
+# Test Strategy:
+

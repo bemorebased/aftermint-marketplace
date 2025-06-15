@@ -1,0 +1,181 @@
+{
+  "tasks": [
+    {
+      "id": 1,
+      "title": "Setup Project Repository",
+      "description": "Create a new project repository for the AfterMint NFT Marketplace UI Enhancement using a version control system like Git.",
+      "details": "Initialize the repository with a .gitignore file, create a README.md file, and set up a remote repository on GitHub or another platform.",
+      "testStrategy": "",
+      "priority": "medium",
+      "dependencies": [],
+      "status": "done",
+      "subtasks": []
+    },
+    {
+      "id": 2,
+      "title": "Install Required Dependencies",
+      "description": "Install the necessary dependencies for the project, including Ethers.js and other libraries required for smart contract interactions.",
+      "details": "Use npm or yarn to install the dependencies listed in the package.json file.",
+      "testStrategy": "",
+      "priority": "medium",
+      "dependencies": [
+        1
+      ],
+      "status": "done",
+      "subtasks": []
+    },
+    {
+      "id": 3,
+      "title": "Implement Wallet Connection and Management",
+      "description": "Develop a wallet connection system that allows users to connect their Web3 wallets (e.g., MetaMask) and manage their native token (BASED) balance.",
+      "details": "Use Ethers.js to interact with the user's wallet and retrieve their BASED balance. Implement a system for persisting wallet connections across page refreshes.",
+      "testStrategy": "",
+      "priority": "high",
+      "dependencies": [
+        2
+      ],
+      "status": "done",
+      "subtasks": []
+    },
+    {
+      "id": 4,
+      "title": "Develop NFT Display and Listing Features",
+      "description": "Implement features for displaying all NFTs owned by the user, including image, name, and collection name. Develop a system for listing NFTs on the marketplace.",
+      "details": "Use the BasedAI explorer APIs to fetch NFT data dynamically. Implement a system for displaying NFT listings with links to individual detail pages.",
+      "testStrategy": "",
+      "priority": "high",
+      "dependencies": [
+        3
+      ],
+      "status": "pending",
+      "subtasks": []
+    },
+    {
+      "id": 5,
+      "title": "Implement NFT Detail Page and Actions",
+      "description": "Develop an NFT detail page that displays comprehensive, dynamically fetched data for a selected NFT. Implement contextual actions based on ownership and listing status.",
+      "details": "Use Ethers.js to interact with the smart contracts and retrieve NFT metadata. Implement a system for displaying offer history, sales history, and other relevant data.",
+      "testStrategy": "",
+      "priority": "high",
+      "dependencies": [
+        4
+      ],
+      "status": "done",
+      "subtasks": []
+    },
+    {
+      "id": 6,
+      "title": "Develop Marketplace Interactions (Listing, Buying, Updating, Canceling)",
+      "description": "Implement features for listing NFTs for sale, buying listed NFTs, updating listing prices, canceling listings, making offers, accepting offers, and canceling offers.",
+      "details": "Use Ethers.js to interact with the smart contracts and implement a system for handling ERC721 approval, transfer, and escrow. Implement robust error handling for API calls and blockchain transactions.",
+      "testStrategy": "",
+      "priority": "high",
+      "dependencies": [
+        5
+      ],
+      "status": "pending",
+      "subtasks": [
+        {
+          "id": 1,
+          "title": "Implement NFT Listing Feature",
+          "description": "Create a function to list an NFT on the marketplace with required metadata.",
+          "dependencies": [],
+          "details": "This feature will involve interacting with the smart contract to create a new listing.\n<info added on 2025-05-22T09:22:08.451Z>\nThis feature will involve interacting with the smart contract to create a new listing, specifically for buying listed NFTs.\n\n1.  **UI Components:**\n    *   Add \"Buy\" button on NFT detail page (`aftermint-frontend/src/app/nft/[collection]/[tokenId]/page.tsx`) for listed NFTs.\n    *   Consider adding a \"Buy\" button on `NftCard.tsx` in the profile.\n    *   Create a new modal/form component for buying inputs:\n        *   Price (in BASED, string input).\n        *   Expiration date (optional, use a date picker).\n        *   Private buyer address (optional, string input, validate address format).\n\n2.  **Smart Contract Interaction Logic (new `marketplaceService.ts`):**\n    *   Define a function `buyNFTOnMarketplace(nftContractAddress: string, tokenId: string, priceInBased: string, expirationDate?: Date, privateBuyerAddress?: string, signer: ethers.Signer): Promise<void>`.\n    *   Inside this function:\n        *   **ERC721 Approval:**\n            *   Get NFT contract instance (`new ethers.Contract(nftContractAddress, ERC721_ABI, signer)`).\n            *   Call `nftContract.approve(MARKETPLACE_CONTRACT_ADDRESS, tokenId)`.\n            *   Wait for transaction confirmation.\n        *   **Marketplace Buying:**\n            *   Get Marketplace contract instance (`new ethers.Contract(MARKETPLACE_CONTRACT_ADDRESS, MARKETPLACE_ABI, signer)`).\n            *   Convert `priceInBased` to wei (`ethers.utils.parseUnits(priceInBased, 'ether')`).\n            *   Convert `expirationDate` to Unix timestamp. If undefined, use 0.\n            *   Set `privateBuyerAddress` to `ethers.constants.AddressZero` if undefined or empty.\n            *   Call `marketplaceContract.buyNFT(nftContractAddress, tokenId, priceInWei, expirationTimestamp, privateBuyer)`.\n            *   Wait for transaction confirmation.\n\n3.  **State Management & UI Updates:**\n    *   On successful buying, update the UI to show the NFT as bought (e.g., on the detail page and profile page).\n    *   Refetch NFT data or update local state.\n\n4.  **Error Handling & Notifications:**\n    *   Implement user feedback for transaction submission, confirmation (success), and errors (e.g., user rejection, gas issues, contract reverts). Use toasts or similar.\n\n5.  **ABI and Address Placeholders:**\n    *   Define constants for `MARKETPLACE_CONTRACT_ADDRESS`.\n    *   Store ABIs (Marketplace and a minimal ERC721) likely in `lib/abi/`.\n</info added on 2025-05-22T09:22:08.451Z>",
+          "status": "in-progress"
+        },
+        {
+          "id": 2,
+          "title": "Buy Listed NFTs",
+          "description": "Create a function to purchase an NFT from the marketplace using the user's wallet.",
+          "dependencies": [
+            1
+          ],
+          "details": "This feature will involve interacting with the smart contract to transfer ownership of the NFT.",
+          "status": "pending"
+        },
+        {
+          "id": 3,
+          "title": "Update Listing Prices",
+          "description": "Create a function to update the price of an existing listing.",
+          "dependencies": [
+            1
+          ],
+          "details": "This feature will involve interacting with the smart contract to update the listing's metadata.",
+          "status": "pending"
+        },
+        {
+          "id": 4,
+          "title": "Implement Listing Cancellation",
+          "description": "Create a function to cancel an existing listing.",
+          "dependencies": [
+            1
+          ],
+          "details": "This feature will involve interacting with the smart contract to remove the listing from the marketplace.",
+          "status": "pending"
+        },
+        {
+          "id": 5,
+          "title": "Implement Offer Handling",
+          "description": "Create a function to handle offers on listed NFTs, including creating and accepting offers.",
+          "dependencies": [
+            1
+          ],
+          "details": "This feature will involve interacting with the smart contract to manage offers on listings.",
+          "status": "pending"
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "title": "Implement Collection Browsing Features",
+      "description": "Develop features for browsing NFT collections, including a collections page and single collection pages.",
+      "details": "Use the BasedAI explorer APIs to fetch collection data dynamically. Implement a system for displaying basic collection info and listing all NFTs within that collection.",
+      "testStrategy": "",
+      "priority": "medium",
+      "dependencies": [
+        6
+      ],
+      "status": "pending",
+      "subtasks": []
+    },
+    {
+      "id": 8,
+      "title": "Implement Transfer NFT Feature",
+      "description": "Develop a feature for transferring NFTs directly to another wallet address (standard ERC721 transfer).",
+      "details": "Use Ethers.js to interact with the smart contracts and implement a system for handling ERC721 approval and transfer.",
+      "testStrategy": "",
+      "priority": "medium",
+      "dependencies": [
+        6
+      ],
+      "status": "pending",
+      "subtasks": []
+    },
+    {
+      "id": 9,
+      "title": "Implement Robust Error Handling and Clear Loading States",
+      "description": "Develop robust error handling for API calls and blockchain transactions. Implement clear loading states for all asynchronous operations.",
+      "details": "Use try-catch blocks to handle errors and implement a system for displaying clear loading states for all asynchronous operations.",
+      "testStrategy": "",
+      "priority": "medium",
+      "dependencies": [
+        6
+      ],
+      "status": "pending",
+      "subtasks": []
+    },
+    {
+      "id": 10,
+      "title": "Test and Deploy the Application",
+      "description": "Test the application thoroughly and deploy it on a production environment.",
+      "details": "Use testing frameworks like Jest or Mocha to write unit tests and integration tests. Implement a system for continuous integration and deployment (CI/CD).",
+      "testStrategy": "",
+      "priority": "high",
+      "dependencies": [
+        9
+      ],
+      "status": "pending",
+      "subtasks": []
+    }
+  ]
+}

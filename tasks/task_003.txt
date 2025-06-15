@@ -1,0 +1,11 @@
+# Task ID: 3
+# Title: Implement Wallet Connection and Management
+# Status: done
+# Dependencies: 2
+# Priority: high
+# Description: Develop a wallet connection system that allows users to connect their Web3 wallets (e.g., MetaMask) and manage their native token (BASED) balance.
+# Details:
+Use Ethers.js to interact with the user's wallet and retrieve their BASED balance. Implement a system for persisting wallet connections across page refreshes.
+
+# Test Strategy:
+

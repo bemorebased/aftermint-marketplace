@@ -1,0 +1,11 @@
+# Task ID: 1
+# Title: Setup Project Repository
+# Status: done
+# Dependencies: None
+# Priority: medium
+# Description: Create a new project repository for the AfterMint NFT Marketplace UI Enhancement using a version control system like Git.
+# Details:
+Initialize the repository with a .gitignore file, create a README.md file, and set up a remote repository on GitHub or another platform.
+
+# Test Strategy:
+

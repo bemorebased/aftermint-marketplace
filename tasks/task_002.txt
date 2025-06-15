@@ -1,0 +1,11 @@
+# Task ID: 2
+# Title: Install Required Dependencies
+# Status: done
+# Dependencies: 1
+# Priority: medium
+# Description: Install the necessary dependencies for the project, including Ethers.js and other libraries required for smart contract interactions.
+# Details:
+Use npm or yarn to install the dependencies listed in the package.json file.
+
+# Test Strategy:
+
