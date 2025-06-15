@@ -1,34 +1,61 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Enable React Strict Mode for better development experience
+  reactStrictMode: true,
+  
+  // Disable ESLint during builds to focus on core functionality
   eslint: {
-    // Disable ESLint during build to focus on React rendering issues
     ignoreDuringBuilds: true,
   },
-  // Disable static optimization to prevent prerendering issues
-  output: 'standalone',
+  
+  // TypeScript configuration
+  typescript: {
+    ignoreBuildErrors: false,
+  },
+  
+  // Experimental features for Next.js 15
   experimental: {
-    // Handle styled-jsx and hydration issues
+    // Enable SWC transforms for better performance
     forceSwcTransforms: true,
-    // Disable static generation for error pages
-    skipTrailingSlashRedirect: true,
   },
-  // Disable styled-jsx to prevent SSR context issues
-  compiler: {
-    styledComponents: false,
-  },
-  // Custom webpack config to handle styled-jsx issues
-  webpack: (config, { isServer }) => {
-    if (isServer) {
-      // Prevent styled-jsx from causing issues during SSR
-      config.externals = config.externals || [];
-      config.externals.push({
-        'styled-jsx/style': 'styled-jsx/style',
-      });
+  
+  // Server external packages (moved out of experimental in Next.js 15)
+  serverExternalPackages: [],
+  
+  // Webpack configuration for better module resolution
+  webpack: (config, { buildId, dev, isServer, defaultLoaders, webpack }) => {
+    // Improve module resolution
+    config.resolve.fallback = {
+      ...config.resolve.fallback,
+      fs: false,
+      net: false,
+      tls: false,
+    };
+    
+    // Optimize chunks for better loading
+    if (!dev && !isServer) {
+      config.optimization.splitChunks = {
+        chunks: 'all',
+        cacheGroups: {
+          vendor: {
+            test: /[\\/]node_modules[\\/]/,
+            name: 'vendors',
+            chunks: 'all',
+          },
+          common: {
+            name: 'common',
+            minChunks: 2,
+            chunks: 'all',
+            enforce: true,
+          },
+        },
+      };
     }
+    
     return config;
   },
-  // Use dynamic rendering to avoid SSR issues
-  trailingSlash: false,
+  
+  // Image optimization configuration
   images: {
     remotePatterns: [
       {
@@ -58,7 +85,7 @@ const nextConfig = {
       },
       {
         protocol: 'https',
-        hostname: 'kektech.xyz', // Covers www.kektech.xyz
+        hostname: 'kektech.xyz',
         pathname: '/**',
       },
       {
@@ -88,7 +115,7 @@ const nextConfig = {
       },
       {
         protocol: 'https',
-        hostname: 'cosmicpond-metadata.com', // Add missing domain
+        hostname: 'cosmicpond-metadata.com',
         pathname: '/**',
       },
       {
@@ -103,7 +130,7 @@ const nextConfig = {
       },
       {
         protocol: 'https',
-        hostname: 'basedbeasts.xyz', // Covers www.basedbeasts.xyz
+        hostname: 'basedbeasts.xyz',
         pathname: '/**',
       },
       {
@@ -128,19 +155,14 @@ const nextConfig = {
       },
       {
         protocol: 'https',
-        hostname: '*.mypinata.cloud', // Allow all subdomains of mypinata.cloud
+        hostname: '*.mypinata.cloud',
         pathname: '/**',
       },
       {
         protocol: 'https',
-        hostname: 'i.imgur.com', // Add Imgur for NFT images
+        hostname: 'i.imgur.com',
         pathname: '/**',
       },
-      {
-        protocol: 'https',
-        hostname: 'www.fancyfrogfamily.com',
-      },
-      // Add common NFT metadata domains
       {
         protocol: 'https',
         hostname: 'gateway.pinata.cloud',
@@ -168,6 +190,17 @@ const nextConfig = {
         pathname: '/**',
       },
     ],
+  },
+  
+  // Output configuration for deployment
+  output: 'standalone',
+  
+  // Disable trailing slash redirects
+  trailingSlash: false,
+  
+  // Custom build ID for consistent builds
+  generateBuildId: async () => {
+    return 'aftermint-marketplace-build';
   },
 };
 

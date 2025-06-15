@@ -19,6 +19,9 @@ export interface ProfileNFT {
   media_url?: string;
   token_type?: string;
   value?: string;
+  price?: number; // For marketplace listings
+  seller?: string; // For marketplace listings
+  listing?: any; // For marketplace listing data
 }
 
 // Interface for collection data from profile endpoints
